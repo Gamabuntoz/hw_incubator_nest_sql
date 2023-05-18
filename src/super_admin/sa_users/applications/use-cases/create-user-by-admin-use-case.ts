@@ -1,6 +1,5 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import * as bcrypt from 'bcrypt';
-import { Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
 import { SAUserInfoDTO } from '../sa-users.dto';
@@ -32,38 +31,30 @@ export class CreateUserByAdminUseCases
       passwordSalt,
     );
     const newUser: User = {
-      _id: new Types.ObjectId(),
-      accountData: {
-        login: command.inputData.login,
-        email: command.inputData.email,
-        passwordHash: passwordHash,
-        createdAt: new Date().toISOString(),
-      },
-      emailConfirmation: {
-        confirmationCode: uuidv4(),
-        isConfirmed: true,
-        expirationDate: add(new Date(), {
-          hours: 1,
-        }),
-      },
-      passwordRecovery: {
-        code: 'string',
-        expirationDate: new Date(),
-      },
-      banInformation: {
-        isBanned: false,
-        banReason: null,
-        banDate: null,
-      },
+      id: uuidv4(),
+      login: command.inputData.login,
+      email: command.inputData.email,
+      passwordHash: passwordHash,
+      createdAt: new Date().toISOString(),
+      emailConfirmationCode: uuidv4(),
+      emailIsConfirmed: true,
+      emailConformExpirationDate: add(new Date(), {
+        hours: 1,
+      }).toISOString(),
+      passwordRecoveryCode: 'string',
+      passwordRecoveryExpirationDate: new Date().toISOString(),
+      userIsBanned: false,
+      userBanReason: null,
+      userBanDate: null,
     };
     await this.saUsersRepository.createUser(newUser);
     const userView = new SAUserInfoDTO(
-      newUser._id.toString(),
-      newUser.accountData.login,
-      newUser.accountData.email,
-      newUser.accountData.createdAt,
+      newUser.id,
+      newUser.login,
+      newUser.email,
+      newUser.createdAt,
       {
-        isBanned: newUser.banInformation.isBanned,
+        isBanned: newUser.userIsBanned,
         banDate: null,
         banReason: null,
       },

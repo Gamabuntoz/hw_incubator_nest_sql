@@ -1,8 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InputEmailForResendCodeDTO } from '../auth.dto';
-import { UsersRepository } from '../../../users/users.repository';
+import { AuthRepository } from '../../auth.repository';
 import { EmailAdapter } from '../../../../adapters/email-adapter/email.adapter';
 import { Result, ResultCode } from '../../../../helpers/contract';
+import { User } from '../../../../super_admin/sa_users/applications/users.schema';
 
 export class ResendEmailCommand {
   constructor(public inputData: InputEmailForResendCodeDTO) {}
@@ -13,21 +14,21 @@ export class ResendEmailUseCases
   implements ICommandHandler<ResendEmailCommand>
 {
   constructor(
-    private usersRepository: UsersRepository,
+    private usersRepository: AuthRepository,
     private emailAdapter: EmailAdapter,
   ) {}
 
   async execute(command: ResendEmailCommand): Promise<Result<boolean>> {
-    const user = await this.usersRepository.findUserByLoginOrEmail(
+    const user: User = await this.usersRepository.findUserByLoginOrEmail(
       command.inputData.email,
     );
-    await this.usersRepository.setNewConfirmationCode(user);
+    await this.usersRepository.setNewConfirmationCode(user.id);
     const updatedUser = await this.usersRepository.findUserByLoginOrEmail(
       command.inputData.email,
     );
     await this.emailAdapter.sendEmail(
-      updatedUser.accountData.email,
-      updatedUser.emailConfirmation.confirmationCode,
+      updatedUser.email,
+      updatedUser.emailConfirmationCode,
     );
     return new Result<boolean>(ResultCode.Success, true, null);
   }

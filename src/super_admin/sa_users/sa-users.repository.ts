@@ -1,102 +1,135 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './applications/users.schema';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { User } from './applications/users.schema';
+import { FilterQuery } from 'mongoose';
 import { InputBanUserDTO, QueryUsersDTO } from './applications/sa-users.dto';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class SAUsersRepository {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findAllUsers(filter: FilterQuery<User>, queryData: QueryUsersDTO) {
-    let sort = 'accountData.createdAt';
+    let sortBy = 'createdAt';
     if (queryData.sortBy) {
-      sort = `accountData.${queryData.sortBy}`;
+      sortBy = queryData.sortBy;
     }
-    return this.userModel
-      .find(filter)
-      .sort({ [sort]: queryData.sortDirection === 'asc' ? 1 : -1 })
-      .skip((queryData.pageNumber - 1) * queryData.pageSize)
-      .limit(queryData.pageSize)
-      .lean();
-  }
-  createFilter(searchLoginTerm?, searchEmailTerm?, banStatus?) {
-    let filter: any = { $or: [] };
-    const banStatusForSearch = banStatus === 'banned';
-    if (banStatus && banStatus !== 'all') {
-      filter['banInformation.isBanned'] = banStatusForSearch;
-    }
-    if (searchLoginTerm) {
-      filter['$or'].push({
-        'accountData.login': {
-          $regex: searchLoginTerm,
-          $options: 'i',
-        },
-      });
-    }
-
-    if (searchEmailTerm) {
-      filter['$or'].push({
-        'accountData.email': {
-          $regex: searchEmailTerm,
-          $options: 'i',
-        },
-      });
-    }
-    if (!searchLoginTerm && !searchEmailTerm && !banStatus) {
-      filter = {};
-    }
-    if (!searchLoginTerm && !searchEmailTerm && banStatus) {
-      filter = { 'banInformation.isBanned': banStatusForSearch };
-    }
-    return filter;
+    const banStatus = filter.banStatus ? filter.banStatus : null;
+    const searchLoginTerm = filter.searchLoginTerm
+      ? filter.searchLoginTerm
+      : null;
+    const searchEmailTerm = filter.searchEmailTerm
+      ? filter.searchEmailTerm
+      : null;
+    return this.dataSource.query(
+      `
+      SELECT * FROM public."users" 
+      WHERE ("userIsBanned" = $1::BOOLEAN OR $1::BOOLEAN IS NULL) AND
+        (($2::VARCHAR IS NULL OR LOWER("login") ILIKE  '%' || $2::VARCHAR || '%')  OR
+        ($3::VARCHAR IS NULL OR LOWER("email") ILIKE  '%' || $3::VARCHAR || '%'))
+      ORDER BY "${sortBy}" ${queryData.sortDirection}
+      LIMIT $4
+      OFFSET $5
+      `,
+      [
+        banStatus,
+        searchLoginTerm,
+        searchEmailTerm,
+        queryData.pageSize,
+        (queryData.pageNumber - 1) * queryData.pageSize,
+      ],
+    );
   }
 
   async totalCountUsers(filter) {
-    return this.userModel.countDocuments(filter);
+    const banStatus = filter.banStatus ? filter.banStatus : null;
+    const searchLoginTerm = filter.searchLoginTerm
+      ? filter.searchLoginTerm
+      : null;
+    const searchEmailTerm = filter.searchEmailTerm
+      ? filter.searchEmailTerm
+      : null;
+    return this.dataSource.query(
+      `
+      SELECT COUNT("users") 
+      FROM public."users"
+      WHERE ($1::BOOLEAN IS NULL OR "userIsBanned" = $1::BOOLEAN) AND
+        (($2::VARCHAR is null OR LOWER("login") ILIKE  '%' || $2::VARCHAR || '%')  or
+        ($3::VARCHAR is null OR LOWER("email") ILIKE  '%' || $3::VARCHAR || '%'))
+      `,
+      [banStatus, searchLoginTerm, searchEmailTerm],
+    );
   }
 
   async createUser(newUser: User) {
-    await this.userModel.create(newUser);
+    await this.dataSource.query(
+      `
+      INSERT INTO "users"
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
+      `,
+      [
+        newUser.id,
+        newUser.login,
+        newUser.email,
+        newUser.passwordHash,
+        newUser.createdAt,
+        newUser.emailConfirmationCode,
+        newUser.emailIsConfirmed,
+        newUser.passwordRecoveryCode,
+        newUser.passwordRecoveryExpirationDate,
+        newUser.userIsBanned,
+        newUser.userBanReason,
+        newUser.userBanDate,
+        newUser.emailConformExpirationDate,
+      ],
+    );
     return newUser;
   }
 
-  async findUserById(id: Types.ObjectId) {
-    return this.userModel.findOne({ _id: id });
-  }
-
-  async updateUserBanStatus(
-    userId: Types.ObjectId,
-    inputData: InputBanUserDTO,
-  ) {
-    const result = await this.userModel.updateOne(
-      { _id: userId },
-      {
-        $set: {
-          'banInformation.isBanned': inputData.isBanned,
-          'banInformation.banReason': inputData.isBanned
-            ? inputData.banReason
-            : null,
-          'banInformation.banDate': inputData.isBanned ? new Date() : null,
-        },
-      },
+  async findUserById(id: string) {
+    return this.dataSource.query(
+      `
+      SELECT * FROM "users"
+      WHERE "id" = $1
+      `,
+      [id],
     );
-    return result.matchedCount === 1;
   }
 
-  async findUserByLoginOrEmail(loginOrEmail: string) {
+  async updateUserBanStatus(userId: string, inputData: InputBanUserDTO) {
+    const result = await this.dataSource.query(
+      `
+      UPDATE "users"
+      SET "userIsBanned" = $1, "userBanReason" = $2, "userBanDate" = $3
+      WHERE id = $4
+      `,
+      [
+        inputData.isBanned,
+        inputData.isBanned ? inputData.banReason : null,
+        inputData.isBanned ? new Date().toISOString() : null,
+        userId,
+      ],
+    );
+    return result[1] === 1;
+  }
+
+  /*async findUserByLoginOrEmail(loginOrEmail: string) {
     return this.userModel.findOne({
       $or: [
         { 'accountData.login': loginOrEmail },
         { 'accountData.email': loginOrEmail },
       ],
     });
-  }
+  }*/
 
-  async deleteUser(id: Types.ObjectId) {
-    const result = await this.userModel.deleteOne({
-      _id: id,
-    });
-    return result.deletedCount === 1;
+  async deleteUser(id: string) {
+    const result = await this.dataSource.query(
+      `
+      DELETE FROM "users"
+      WHERE "id" = $1
+      `,
+      [id],
+    );
+    return result[1] === 1;
   }
 }

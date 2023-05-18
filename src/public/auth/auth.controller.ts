@@ -171,7 +171,6 @@ export class AuthController {
     }
     return result.data;
   }
-
   @SkipThrottle()
   @UseGuards(JwtRefreshAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)

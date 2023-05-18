@@ -1,9 +1,10 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import * as bcrypt from 'bcrypt';
-import { UsersRepository } from '../../../users/users.repository';
+import { AuthRepository } from '../../auth.repository';
 import { AuthService } from '../../auth.service';
 import { InputNewPassDTO } from '../auth.dto';
 import { Result, ResultCode } from '../../../../helpers/contract';
+import { User } from '../../../../super_admin/sa_users/applications/users.schema';
 
 export class NewPasswordCommand {
   constructor(public inputData: InputNewPassDTO) {}
@@ -14,12 +15,12 @@ export class NewPasswordUseCases
   implements ICommandHandler<NewPasswordCommand>
 {
   constructor(
-    private usersRepository: UsersRepository,
+    private authRepository: AuthRepository,
     private authService: AuthService,
   ) {}
 
   async execute(command: NewPasswordCommand): Promise<Result<boolean>> {
-    const user = await this.usersRepository.findUserByRecoveryCode(
+    const user: User = await this.authRepository.findUserByRecoveryCode(
       command.inputData.recoveryCode,
     );
     const passwordSalt = await bcrypt.genSalt(10);
@@ -27,10 +28,7 @@ export class NewPasswordUseCases
       command.inputData.newPassword,
       passwordSalt,
     );
-    await this.usersRepository.updatePassword(
-      user._id.toString(),
-      passwordHash,
-    );
+    await this.authRepository.updatePassword(user.id, passwordHash);
     return new Result<boolean>(ResultCode.Success, true, null);
   }
 }

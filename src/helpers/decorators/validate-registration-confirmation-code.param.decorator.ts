@@ -3,7 +3,7 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { UsersRepository } from '../../public/users/users.repository';
+import { AuthRepository } from '../../public/auth/auth.repository';
 
 @ValidatorConstraint({
   name: 'ValidateRegistrationConfirmationCode',
@@ -13,13 +13,13 @@ import { UsersRepository } from '../../public/users/users.repository';
 export class ValidateRegistrationConfirmationCodeRule
   implements ValidatorConstraintInterface
 {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(private usersRepository: AuthRepository) {}
 
   async validate(value: string) {
     const user = await this.usersRepository.findUserByConfirmationCode(value);
     if (!user) return false;
-    if (user.emailConfirmation.expirationDate < new Date()) return false;
-    return !user.emailConfirmation.isConfirmed;
+    if (user.expirationDate < new Date()) return false;
+    return !user.isConfirmed;
   }
   defaultMessage() {
     return `Code is incorrect, expired or already been applied`;

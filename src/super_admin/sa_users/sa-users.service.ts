@@ -12,7 +12,7 @@ export class SAUsersService {
   async findUsers(
     queryData: QueryUsersDTO,
   ): Promise<Result<Paginated<SAUserInfoDTO[]>>> {
-    const filter = this.saUsersRepository.createFilter(
+    const filter = this.createFilter(
       queryData.searchLoginTerm,
       queryData.searchEmailTerm,
       queryData.banStatus,
@@ -25,22 +25,14 @@ export class SAUsersService {
     const paginatedUsers = await Paginated.getPaginated<SAUserInfoDTO[]>({
       pageNumber: queryData.pageNumber,
       pageSize: queryData.pageSize,
-      totalCount,
+      totalCount: totalCount[0].count,
       items: findAllUsers.map(
         (u) =>
-          new SAUserInfoDTO(
-            u._id.toString(),
-            u.accountData.login,
-            u.accountData.email,
-            u.accountData.createdAt,
-            {
-              isBanned: u.banInformation.isBanned,
-              banDate: u.banInformation.banDate
-                ? u.banInformation.banDate.toISOString()
-                : null,
-              banReason: u.banInformation.banReason,
-            },
-          ),
+          new SAUserInfoDTO(u.id, u.login, u.email, u.createdAt, {
+            isBanned: u.userIsBanned,
+            banDate: u.userBanDate ? u.userBanDate : null,
+            banReason: u.userBanReason ? u.userBanReason : null,
+          }),
       ),
     });
 
@@ -49,5 +41,26 @@ export class SAUsersService {
       paginatedUsers,
       null,
     );
+  }
+
+  createFilter(searchLoginTerm?, searchEmailTerm?, banStatus?) {
+    const filter: any = {};
+
+    filter['banStatus'] = banStatus === 'banned';
+    if (!banStatus && banStatus === 'all') {
+      filter['banStatus'] = null;
+    }
+
+    filter['searchLoginTerm'] = null;
+    if (searchLoginTerm) {
+      filter['searchLoginTerm'] = searchLoginTerm;
+    }
+
+    filter['searchEmailTerm'] = null;
+    if (searchLoginTerm) {
+      filter['searchEmailTerm'] = searchEmailTerm;
+    }
+
+    return filter;
   }
 }

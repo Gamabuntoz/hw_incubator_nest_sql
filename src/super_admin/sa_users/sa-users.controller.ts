@@ -15,8 +15,6 @@ import { SAUsersService } from './sa-users.service';
 import { InputBanUserDTO, QueryUsersDTO } from './applications/sa-users.dto';
 import { BasicAuthGuard } from '../../security/guards/basic-auth.guard';
 import { CommandBus } from '@nestjs/cqrs';
-import { TryObjectIdPipe } from '../../helpers/decorators/try-object-id.param.decorator';
-import { Types } from 'mongoose';
 import { DeleteUserCommand } from './applications/use-cases/delete-user-use-cases';
 import { Result, ResultCode } from '../../helpers/contract';
 import { InputRegistrationDTO } from '../../public/auth/applications/auth.dto';
@@ -32,7 +30,6 @@ export class SAUsersController {
   //
   // Query controller
   //
-  //
   @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.OK)
   @Get()
@@ -44,9 +41,7 @@ export class SAUsersController {
     return result.data;
   }
   //
-  //
   // Command controller
-  //
   //
   @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.CREATED)
@@ -65,7 +60,7 @@ export class SAUsersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @Put(':userId/ban')
   async banUser(
-    @Param('userId', new TryObjectIdPipe()) userId: Types.ObjectId,
+    @Param('userId') userId: string,
     @Body() inputData: InputBanUserDTO,
   ) {
     const result = await this.commandBus.execute(
@@ -80,9 +75,7 @@ export class SAUsersController {
   @UseGuards(BasicAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)
   @Delete(':userId')
-  async deleteUser(
-    @Param('userId', new TryObjectIdPipe()) userId: Types.ObjectId,
-  ) {
+  async deleteUser(@Param('userId') userId: string) {
     const result = await this.commandBus.execute(new DeleteUserCommand(userId));
     if (result.code !== ResultCode.Success) {
       Result.sendResultError(result.code);

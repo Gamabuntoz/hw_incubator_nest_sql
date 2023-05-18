@@ -1,15 +1,10 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { TestingController } from './testing/testing.controller';
 import { ConfigModule } from '@nestjs/config';
-import * as process from 'process';
-import {
-  User,
-  UserSchema,
-} from './super_admin/sa_users/applications/users.schema';
-import { UsersRepository } from './public/users/users.repository';
+import { AuthRepository } from './public/auth/auth.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
 import { jwtConstants } from './helpers/constants';
@@ -20,10 +15,6 @@ import { OptionalJwtAuthGuard } from './security/guards/optional-jwt-auth.guard'
 import { EmailAdapter } from './adapters/email-adapter/email.adapter';
 import { AuthController } from './public/auth/auth.controller';
 import { AuthService } from './public/auth/auth.service';
-import {
-  Device,
-  DeviceSchema,
-} from './public/devices/applications/devices.schema';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { DevicesRepository } from './public/devices/devices.repository';
 import { DevicesController } from './public/devices/devices.controller';
@@ -79,7 +70,7 @@ const decorators = [
   ValidateRegistrationConfirmationCodeRule,
   ValidateEmailForResendCodeRule,
 ];
-const repositories = [SAUsersRepository, UsersRepository, DevicesRepository];
+const repositories = [SAUsersRepository, AuthRepository, DevicesRepository];
 const services = [AuthService, AppService, SAUsersService, DevicesService];
 const adapters = [EmailAdapter];
 const controllers = [
@@ -103,11 +94,16 @@ const controllers = [
       secret: jwtConstants.secretKey,
       signOptions: { expiresIn: '5m' },
     }),
-    MongooseModule.forRoot(process.env.MONGO_URI),
-    MongooseModule.forFeature([
-      { name: User.name, schema: UserSchema },
-      { name: Device.name, schema: DeviceSchema },
-    ]),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: 'localhost',
+      port: 5432,
+      username: 'postgres',
+      password: 'a@R~w2B0Lf9V',
+      database: 'incubator_nestjs',
+      autoLoadEntities: false,
+      synchronize: false,
+    }),
   ],
   controllers: [...controllers],
   providers: [

@@ -1,24 +1,57 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Device, DeviceDocument } from './applications/devices.schema';
-import { Model } from 'mongoose';
+import { Device } from './applications/devices.schema';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class DevicesRepository {
-  constructor(
-    @InjectModel(Device.name) private deviceModel: Model<DeviceDocument>,
-  ) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
+
   async findAllUserDevices(currentUserId: string) {
-    return this.deviceModel.find({ userId: currentUserId });
+    return this.dataSource.query(
+      `
+      SELECT * FROM "devices"
+      WHERE "userId" = $1
+      `,
+      [currentUserId],
+    );
   }
+
   async findDeviceByDateAndUserId(issueAt: number, userId: string) {
-    return this.deviceModel.findOne({ issueAt: issueAt, userId: userId });
+    return this.dataSource.query(
+      `
+      SELECT * FROM "devices"
+      WHERE "issueAt" = $1 AND "userId" = $2
+      `,
+      [issueAt, userId],
+    );
   }
+
   async findDeviceByDeviceId(deviceId: string) {
-    return this.deviceModel.findOne({ deviceId: deviceId });
+    return this.dataSource.query(
+      `
+      SELECT * FROM "devices"
+      WHERE "id" = $1
+      `,
+      [deviceId],
+    );
   }
+
   async insertDeviceInfo(device: Device) {
-    await this.deviceModel.create(device);
+    await this.dataSource.query(
+      `
+      INSERT INTO "devices"
+      VALUES ($1, $2, $3, $4, $5, $6);
+      `,
+      [
+        device.id,
+        device.issueAt,
+        device.expiresAt,
+        device.ipAddress,
+        device.userId,
+        device.deviceName,
+      ],
+    );
     return device;
   }
 
@@ -27,32 +60,47 @@ export class DevicesRepository {
     userId: string,
     newIssueAt: number,
   ) {
-    const deviceInstance = await this.deviceModel.findOne({
-      issueAt: oldIssueAt,
-      userId: userId,
-    });
-    deviceInstance.issueAt = newIssueAt;
-    await deviceInstance.save();
-    return true;
+    const result = await this.dataSource.query(
+      `
+      UPDATE "devices"
+      SET "issueAt" = $1
+      WHERE "issueAt" = $2 AND "userId" = $3
+      `,
+      [newIssueAt, oldIssueAt, userId],
+    );
+    return result.matchedCount === 1;
   }
 
   async deleteAllDevicesExceptCurrent(issueAt: number, userId: string) {
-    await this.deviceModel.deleteMany({
-      issueAt: { $ne: issueAt },
-      userId: userId,
-    });
-    return true;
+    const result = await this.dataSource.query(
+      `
+      DELETE FROM "devices"
+      WHERE "issueAt" != $1 AND "userId" = $2
+      `,
+      [issueAt, userId],
+    );
+    return result.deletedCount === 1;
   }
 
   async deleteDevice(issueAt: number, userId: string) {
-    const result = await this.deviceModel.deleteOne({
-      issueAt: issueAt,
-      userId: userId,
-    });
+    const result = await this.dataSource.query(
+      `
+      DELETE FROM "devices"
+      WHERE "issueAt" = $1 AND "userId" = $2
+      `,
+      [issueAt, userId],
+    );
     return result.deletedCount === 1;
   }
+
   async deleteDeviceById(deviceId: string): Promise<boolean> {
-    const result = await this.deviceModel.deleteOne({ deviceId: deviceId });
+    const result = await this.dataSource.query(
+      `
+      DELETE FROM "devices"
+      WHERE "id" = $1
+      `,
+      [deviceId],
+    );
     return result.deletedCount === 1;
   }
 }
