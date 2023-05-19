@@ -23,7 +23,7 @@ export class AuthRepository {
         newUser.createdAt,
         newUser.emailConfirmationCode,
         newUser.emailIsConfirmed,
-        newUser.emailConformExpirationDate,
+        newUser.emailConfirmExpirationDate,
         newUser.passwordRecoveryCode,
         newUser.passwordRecoveryExpirationDate,
         newUser.userIsBanned,

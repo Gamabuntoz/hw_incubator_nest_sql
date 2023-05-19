@@ -38,7 +38,7 @@ export class CreateUserByAdminUseCases
       createdAt: new Date().toISOString(),
       emailConfirmationCode: uuidv4(),
       emailIsConfirmed: true,
-      emailConformExpirationDate: add(new Date(), {
+      emailConfirmExpirationDate: add(new Date(), {
         hours: 1,
       }).toISOString(),
       passwordRecoveryCode: 'string',

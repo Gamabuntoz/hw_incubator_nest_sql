@@ -51,7 +51,7 @@ export class RegistrationUserUseCases
       createdAt: new Date().toISOString(),
       emailConfirmationCode: uuidv4(),
       emailIsConfirmed: false,
-      emailConformExpirationDate: add(new Date(), {
+      emailConfirmExpirationDate: add(new Date(), {
         hours: 1,
       }).toISOString(),
       passwordRecoveryCode: 'string',

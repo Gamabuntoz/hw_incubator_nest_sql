@@ -17,7 +17,7 @@ export class Users {
   @Column()
   emailIsConfirmed: boolean;
   @Column()
-  emailConformExpirationDate: string;
+  emailConfirmExpirationDate: string;
   @Column({ nullable: true })
   passwordRecoveryCode: string | null;
   @Column({ nullable: true })
