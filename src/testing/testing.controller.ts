@@ -11,8 +11,8 @@ export class TestingController {
     }
     await this.dataSource.query(
       `
+      DELETE FROM "devices" CASCADE;
       DELETE FROM "users" CASCADE;
-      DELETE FROM "devices" CASCADE
       `,
     );
     return;
