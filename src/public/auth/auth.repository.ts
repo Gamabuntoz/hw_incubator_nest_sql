@@ -35,13 +35,14 @@ export class AuthRepository {
   }
 
   async findUserById(id: string) {
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
       SELECT * FROM "users"
       WHERE "id" = $1
       `,
       [id],
     );
+    return result[0];
   }
 
   /*async countBannedUsersInIdArray(ids: Types.ObjectId[]) {
@@ -81,13 +82,14 @@ export class AuthRepository {
   }
 
   async findUserByConfirmationCode(code: string) {
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
       SELECT * FROM "users"
       WHERE "emailConfirmationCode" = $1
       `,
       [code],
     );
+    return result[0];
   }
 
   async updateConfirmation(id: string) {
