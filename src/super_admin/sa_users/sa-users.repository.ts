@@ -75,12 +75,12 @@ export class SAUsersRepository {
         newUser.createdAt,
         newUser.emailConfirmationCode,
         newUser.emailIsConfirmed,
+        newUser.emailConformExpirationDate,
         newUser.passwordRecoveryCode,
         newUser.passwordRecoveryExpirationDate,
         newUser.userIsBanned,
         newUser.userBanReason,
         newUser.userBanDate,
-        newUser.emailConformExpirationDate,
       ],
     );
     return newUser;
