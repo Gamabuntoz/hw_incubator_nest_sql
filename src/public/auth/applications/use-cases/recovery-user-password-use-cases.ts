@@ -3,7 +3,7 @@ import { InputEmailForResendCodeDTO } from '../auth.dto';
 import { AuthRepository } from '../../auth.repository';
 import { EmailAdapter } from '../../../../adapters/email-adapter/email.adapter';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.entity';
+import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class PasswordRecoveryCommand {
   constructor(public inputData: InputEmailForResendCodeDTO) {}
@@ -19,7 +19,7 @@ export class PasswordRecoveryUseCases
   ) {}
 
   async execute(command: PasswordRecoveryCommand): Promise<Result<boolean>> {
-    let user: User = await this.authRepository.findUserByLoginOrEmail(
+    let user: Users = await this.authRepository.findUserByLoginOrEmail(
       command.inputData.email,
     );
     if (!user)

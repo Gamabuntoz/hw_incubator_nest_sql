@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Device } from './applications/devices.entity';
+import { Devices } from './applications/devices.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 
@@ -37,7 +37,7 @@ export class DevicesRepository {
     );
   }
 
-  async insertDeviceInfo(device: Device) {
+  async insertDeviceInfo(device: Devices) {
     await this.dataSource.query(
       `
       INSERT INTO "devices"

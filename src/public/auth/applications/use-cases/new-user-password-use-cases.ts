@@ -4,7 +4,7 @@ import { AuthRepository } from '../../auth.repository';
 import { AuthService } from '../../auth.service';
 import { InputNewPassDTO } from '../auth.dto';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.entity';
+import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class NewPasswordCommand {
   constructor(public inputData: InputNewPassDTO) {}
@@ -20,7 +20,7 @@ export class NewPasswordUseCases
   ) {}
 
   async execute(command: NewPasswordCommand): Promise<Result<boolean>> {
-    const user: User = await this.authRepository.findUserByRecoveryCode(
+    const user: Users = await this.authRepository.findUserByRecoveryCode(
       command.inputData.recoveryCode,
     );
     const passwordSalt = await bcrypt.genSalt(10);

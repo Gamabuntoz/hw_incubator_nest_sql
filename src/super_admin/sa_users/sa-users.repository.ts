@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from './applications/users.entity';
+import { Users } from './applications/users.entity';
 import { FilterQuery } from 'mongoose';
 import { InputBanUserDTO, QueryUsersDTO } from './applications/sa-users.dto';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -9,7 +9,7 @@ import { DataSource } from 'typeorm';
 export class SAUsersRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findAllUsers(filter: FilterQuery<User>, queryData: QueryUsersDTO) {
+  async findAllUsers(filter: FilterQuery<Users>, queryData: QueryUsersDTO) {
     let sortBy = 'createdAt';
     if (queryData.sortBy) {
       sortBy = queryData.sortBy;
@@ -61,7 +61,7 @@ export class SAUsersRepository {
     );
   }
 
-  async createUser(newUser: User) {
+  async createUser(newUser: Users) {
     await this.dataSource.query(
       `
       INSERT INTO "users"

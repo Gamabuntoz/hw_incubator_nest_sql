@@ -1,13 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DevicesRepository } from '../../../devices/devices.repository';
-import { Device } from '../../../devices/applications/devices.entity';
+import { Devices } from '../../../devices/applications/devices.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { jwtConstants } from '../../../../helpers/constants';
 import { InputLoginDTO } from '../auth.dto';
 import { AuthRepository } from '../../auth.repository';
 import { AuthService } from '../../auth.service';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.entity';
+import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class LoginUserCommand {
   constructor(
@@ -26,7 +26,7 @@ export class LoginUserUseCases implements ICommandHandler<LoginUserCommand> {
   ) {}
 
   async execute(command: LoginUserCommand): Promise<Result<object>> {
-    const user: User = await this.authRepository.findUserByLoginOrEmail(
+    const user: Users = await this.authRepository.findUserByLoginOrEmail(
       command.inputData.loginOrEmail,
     );
     if (!user)
@@ -37,7 +37,7 @@ export class LoginUserUseCases implements ICommandHandler<LoginUserCommand> {
         null,
         'User is banned',
       );
-    const device: Device = {
+    const device: Devices = {
       id: uuidv4(),
       ipAddress: command.ip,
       deviceName: command.deviceName,

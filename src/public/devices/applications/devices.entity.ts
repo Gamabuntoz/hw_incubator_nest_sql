@@ -1,8 +1,8 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
-import { User } from '../../../super_admin/sa_users/applications/users.entity';
+import { Users } from '../../../super_admin/sa_users/applications/users.entity';
 
 @Entity()
-export class Device {
+export class Devices {
   @PrimaryGeneratedColumn('uuid')
   id: string;
   @Column()
@@ -13,6 +13,6 @@ export class Device {
   ipAddress: string;
   @Column()
   deviceName: string;
-  @ManyToOne(() => User, (User) => User.id, { cascade: true })
+  @ManyToOne(() => Users, (User) => User.id, { cascade: true })
   userId: string;
 }

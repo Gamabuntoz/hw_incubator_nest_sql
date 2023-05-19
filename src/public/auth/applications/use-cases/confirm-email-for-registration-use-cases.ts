@@ -2,7 +2,7 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { AuthRepository } from '../../auth.repository';
 import { InputConfirmationCodeDTO } from '../auth.dto';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.entity';
+import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class ConfirmEmailCommand {
   constructor(public inputData: InputConfirmationCodeDTO) {}
@@ -15,7 +15,7 @@ export class ConfirmEmailUseCases
   constructor(private authRepository: AuthRepository) {}
 
   async execute(command: ConfirmEmailCommand): Promise<Result<boolean>> {
-    const user: User = await this.authRepository.findUserByConfirmationCode(
+    const user: Users = await this.authRepository.findUserByConfirmationCode(
       command.inputData.code,
     );
     await this.authRepository.updateConfirmation(user.id);

@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
 import { UserInfoDTO } from '../users.dto';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.entity';
+import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class RegistrationUserCommand {
   constructor(public inputData: InputRegistrationDTO) {}
@@ -24,7 +24,7 @@ export class RegistrationUserUseCases
 
   async execute(command: RegistrationUserCommand): Promise<Result<boolean>> {
     await this.createUser(command.inputData);
-    const user: User = await this.authRepository.findUserByLoginOrEmail(
+    const user: Users = await this.authRepository.findUserByLoginOrEmail(
       command.inputData.login,
     );
     await this.emailAdapter.sendEmail(user.email, user.emailConfirmationCode);
@@ -43,7 +43,7 @@ export class RegistrationUserUseCases
       inputData.password,
       passwordSalt,
     );
-    const newUser: User = {
+    const newUser: Users = {
       id: uuidv4(),
       login: inputData.login,
       email: inputData.email,

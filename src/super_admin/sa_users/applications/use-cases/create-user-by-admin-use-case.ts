@@ -7,7 +7,7 @@ import { Result, ResultCode } from '../../../../helpers/contract';
 import { SAUsersService } from '../../sa-users.service';
 import { SAUsersRepository } from '../../sa-users.repository';
 import { InputRegistrationDTO } from '../../../../public/auth/applications/auth.dto';
-import { User } from '../users.entity';
+import { Users } from '../users.entity';
 
 export class CreateUserByAdminCommand {
   constructor(public inputData: InputRegistrationDTO) {}
@@ -30,7 +30,7 @@ export class CreateUserByAdminUseCases
       command.inputData.password,
       passwordSalt,
     );
-    const newUser: User = {
+    const newUser: Users = {
       id: uuidv4(),
       login: command.inputData.login,
       email: command.inputData.email,

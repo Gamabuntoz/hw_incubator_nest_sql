@@ -3,7 +3,7 @@ import { InputEmailForResendCodeDTO } from '../auth.dto';
 import { AuthRepository } from '../../auth.repository';
 import { EmailAdapter } from '../../../../adapters/email-adapter/email.adapter';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.entity';
+import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class ResendEmailCommand {
   constructor(public inputData: InputEmailForResendCodeDTO) {}
@@ -19,7 +19,7 @@ export class ResendEmailUseCases
   ) {}
 
   async execute(command: ResendEmailCommand): Promise<Result<boolean>> {
-    const user: User = await this.usersRepository.findUserByLoginOrEmail(
+    const user: Users = await this.usersRepository.findUserByLoginOrEmail(
       command.inputData.email,
     );
     await this.usersRepository.setNewConfirmationCode(user.id);

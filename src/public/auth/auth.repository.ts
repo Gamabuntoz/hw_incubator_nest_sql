@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../../super_admin/sa_users/applications/users.entity';
+import { Users } from '../../super_admin/sa_users/applications/users.entity';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
 import { InjectDataSource } from '@nestjs/typeorm';
@@ -9,7 +9,7 @@ import { DataSource } from 'typeorm';
 export class AuthRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async createUser(newUser: User) {
+  async createUser(newUser: Users) {
     await this.dataSource.query(
       `
       INSERT INTO "users"

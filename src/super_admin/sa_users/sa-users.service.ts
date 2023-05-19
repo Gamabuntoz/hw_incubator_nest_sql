@@ -3,7 +3,7 @@ import { SAUsersRepository } from './sa-users.repository';
 import { QueryUsersDTO, SAUserInfoDTO } from './applications/sa-users.dto';
 import { Result, ResultCode } from '../../helpers/contract';
 import { Paginated } from '../../helpers/paginated';
-import { User } from './applications/users.entity';
+import { Users } from './applications/users.entity';
 
 @Injectable()
 export class SAUsersService {
@@ -18,7 +18,7 @@ export class SAUsersService {
       queryData.banStatus,
     );
     const totalCount = await this.saUsersRepository.totalCountUsers(filter);
-    const findAllUsers: User[] = await this.saUsersRepository.findAllUsers(
+    const findAllUsers: Users[] = await this.saUsersRepository.findAllUsers(
       filter,
       queryData,
     );
