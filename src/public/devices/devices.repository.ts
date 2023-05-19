@@ -42,15 +42,15 @@ export class DevicesRepository {
     await this.dataSource.query(
       `
       INSERT INTO "devices"
-      VALUES ($1::uuid, $2, $3, $4::uuid, $5, $6);
+      VALUES ($1::uuid, $2, $3, $4, $5, $6::uuid);
       `,
       [
         device.id,
-        device.ipAddress,
-        device.deviceName,
-        device.userId,
         device.issueAt,
         device.expiresAt,
+        device.ipAddress,
+        device.deviceName,
+        device.user,
       ],
     );
     return device;

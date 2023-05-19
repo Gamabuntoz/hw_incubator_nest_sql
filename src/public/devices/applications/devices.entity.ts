@@ -14,5 +14,5 @@ export class Devices {
   @Column()
   deviceName: string;
   @ManyToOne(() => Users, (User) => User.id, { cascade: true })
-  userId: string;
+  user: string;
 }
