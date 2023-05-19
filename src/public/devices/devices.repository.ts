@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Devices } from './applications/devices.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { parse as uuidParse } from 'uuid';
 
 @Injectable()
 export class DevicesRepository {
@@ -41,15 +42,15 @@ export class DevicesRepository {
     await this.dataSource.query(
       `
       INSERT INTO "devices"
-      VALUES ($1, $2, $3, $4, $5, $6);
+      VALUES ($1::uuid, $2, $3, $4::uuid, $5, $6);
       `,
       [
         device.id,
+        device.ipAddress,
+        device.deviceName,
+        device.userId,
         device.issueAt,
         device.expiresAt,
-        device.ipAddress,
-        device.userId,
-        device.deviceName,
       ],
     );
     return device;

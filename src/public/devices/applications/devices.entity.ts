@@ -5,9 +5,9 @@ import { Users } from '../../../super_admin/sa_users/applications/users.entity';
 export class Devices {
   @PrimaryGeneratedColumn('uuid')
   id: string;
-  @Column()
+  @Column({ type: 'numeric' })
   issueAt: number;
-  @Column()
+  @Column({ type: 'numeric' })
   expiresAt: number;
   @Column()
   ipAddress: string;
