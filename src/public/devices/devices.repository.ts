@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Device } from './applications/devices.schema';
+import { Device } from './applications/devices.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 

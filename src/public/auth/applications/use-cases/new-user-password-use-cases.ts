@@ -4,7 +4,7 @@ import { AuthRepository } from '../../auth.repository';
 import { AuthService } from '../../auth.service';
 import { InputNewPassDTO } from '../auth.dto';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.schema';
+import { User } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class NewPasswordCommand {
   constructor(public inputData: InputNewPassDTO) {}

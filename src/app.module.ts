@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TestingController } from './testing/testing.controller';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthRepository } from './public/auth/auth.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -41,6 +41,7 @@ import { BanUserUseCases } from './super_admin/sa_users/applications/use-cases/b
 import { CreateUserByAdminUseCases } from './super_admin/sa_users/applications/use-cases/create-user-by-admin-use-case';
 import { DeleteUserUseCases } from './super_admin/sa_users/applications/use-cases/delete-user-use-cases';
 import { SAUsersRepository } from './super_admin/sa_users/sa-users.repository';
+import { TypeOrmConfig } from './configs/type-orm.config';
 
 const useCases = [
   BanUserUseCases,
@@ -94,15 +95,9 @@ const controllers = [
       secret: jwtConstants.secretKey,
       signOptions: { expiresIn: '5m' },
     }),
-    TypeOrmModule.forRoot({
-      type: 'postgres',
-      host: 'localhost',
-      port: 5432,
-      username: 'postgres',
-      password: 'a@R~w2B0Lf9V',
-      database: 'incubator_nestjs',
-      autoLoadEntities: false,
-      synchronize: false,
+    TypeOrmModule.forRootAsync({
+      useClass: TypeOrmConfig,
+      imports: [ConfigModule],
     }),
   ],
   controllers: [...controllers],

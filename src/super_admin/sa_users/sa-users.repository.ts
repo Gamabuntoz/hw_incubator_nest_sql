@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from './applications/users.schema';
+import { User } from './applications/users.entity';
 import { FilterQuery } from 'mongoose';
 import { InputBanUserDTO, QueryUsersDTO } from './applications/sa-users.dto';
 import { InjectDataSource } from '@nestjs/typeorm';

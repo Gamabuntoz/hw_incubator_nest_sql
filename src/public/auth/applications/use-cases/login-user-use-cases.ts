@@ -1,13 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { DevicesRepository } from '../../../devices/devices.repository';
-import { Device } from '../../../devices/applications/devices.schema';
+import { Device } from '../../../devices/applications/devices.entity';
 import { v4 as uuidv4 } from 'uuid';
 import { jwtConstants } from '../../../../helpers/constants';
 import { InputLoginDTO } from '../auth.dto';
 import { AuthRepository } from '../../auth.repository';
 import { AuthService } from '../../auth.service';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.schema';
+import { User } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class LoginUserCommand {
   constructor(

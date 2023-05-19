@@ -7,7 +7,7 @@ import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
 import { UserInfoDTO } from '../users.dto';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.schema';
+import { User } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class RegistrationUserCommand {
   constructor(public inputData: InputRegistrationDTO) {}

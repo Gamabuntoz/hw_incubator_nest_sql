@@ -7,7 +7,7 @@ import { Result, ResultCode } from '../../../../helpers/contract';
 import { SAUsersService } from '../../sa-users.service';
 import { SAUsersRepository } from '../../sa-users.repository';
 import { InputRegistrationDTO } from '../../../../public/auth/applications/auth.dto';
-import { User } from '../users.schema';
+import { User } from '../users.entity';
 
 export class CreateUserByAdminCommand {
   constructor(public inputData: InputRegistrationDTO) {}

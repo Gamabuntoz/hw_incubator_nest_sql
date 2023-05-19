@@ -3,7 +3,7 @@ import { InputEmailForResendCodeDTO } from '../auth.dto';
 import { AuthRepository } from '../../auth.repository';
 import { EmailAdapter } from '../../../../adapters/email-adapter/email.adapter';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { User } from '../../../../super_admin/sa_users/applications/users.schema';
+import { User } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class PasswordRecoveryCommand {
   constructor(public inputData: InputEmailForResendCodeDTO) {}

@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { User } from '../../super_admin/sa_users/applications/users.schema';
+import { User } from '../../super_admin/sa_users/applications/users.entity';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
 import { InjectDataSource } from '@nestjs/typeorm';
