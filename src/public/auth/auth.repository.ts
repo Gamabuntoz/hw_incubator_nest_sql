@@ -72,13 +72,14 @@ export class AuthRepository {
   }
 
   async findUserByRecoveryCode(code: string) {
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
       SELECT * FROM "users"
       WHERE "passwordRecoverCode" = $1
       `,
       [code],
     );
+    return result[0];
   }
 
   async findUserByConfirmationCode(code: string) {

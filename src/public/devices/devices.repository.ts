@@ -19,30 +19,32 @@ export class DevicesRepository {
   }
 
   async findDeviceByDateAndUserId(issueAt: number, userId: string) {
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
       SELECT * FROM "devices"
       WHERE "issueAt" = $1 AND "userId" = $2
       `,
       [issueAt, userId],
     );
+    return result[0];
   }
 
   async findDeviceByDeviceId(deviceId: string) {
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
       SELECT * FROM "devices"
       WHERE "id" = $1
       `,
       [deviceId],
     );
+    return result[0];
   }
 
   async insertDeviceInfo(device: Devices) {
     await this.dataSource.query(
       `
       INSERT INTO "devices"
-      VALUES ($1::uuid, $2, $3, $4, $5, $6::uuid);
+      VALUES ($1, $2, $3, $4, $5, $6);
       `,
       [
         device.id,
