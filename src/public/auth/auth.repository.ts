@@ -102,7 +102,7 @@ export class AuthRepository {
       `,
       [id],
     );
-    return result.matchedCount === 1;
+    return result[1] === 1;
   }
 
   async setNewConfirmationCode(id: string): Promise<boolean> {
@@ -118,7 +118,7 @@ export class AuthRepository {
       `,
       [newCode, newDate, id],
     );
-    return result.matchedCount === 1;
+    return result[1] === 1;
   }
 
   async createPasswordRecoveryCode(id: string) {
@@ -134,7 +134,7 @@ export class AuthRepository {
       `,
       [newCode, newDate, id],
     );
-    return result.matchedCount === 1;
+    return result[1] === 1;
   }
 
   async updatePassword(id: string, passwordHash: string): Promise<boolean> {
@@ -146,6 +146,6 @@ export class AuthRepository {
       `,
       [passwordHash, id],
     );
-    return result.matchedCount === 1;
+    return result[1] === 1;
   }
 }

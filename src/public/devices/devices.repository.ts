@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { Devices } from './applications/devices.entity';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
-import { parse as uuidParse } from 'uuid';
 
 @Injectable()
 export class DevicesRepository {
@@ -71,7 +70,7 @@ export class DevicesRepository {
       `,
       [newIssueAt, oldIssueAt, userId],
     );
-    return result.matchedCount === 1;
+    return result[1] === 1;
   }
 
   async deleteAllDevicesExceptCurrent(issueAt: number, userId: string) {
@@ -82,7 +81,7 @@ export class DevicesRepository {
       `,
       [issueAt, userId],
     );
-    return result.deletedCount === 1;
+    return result[1] === 1;
   }
 
   async deleteDevice(issueAt: number, userId: string) {
@@ -93,7 +92,7 @@ export class DevicesRepository {
       `,
       [issueAt, userId],
     );
-    return result.deletedCount === 1;
+    return result[1] === 1;
   }
 
   async deleteDeviceById(deviceId: string): Promise<boolean> {
@@ -104,6 +103,6 @@ export class DevicesRepository {
       `,
       [deviceId],
     );
-    return result.deletedCount === 1;
+    return result[1] === 1;
   }
 }
