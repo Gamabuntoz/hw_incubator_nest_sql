@@ -92,7 +92,6 @@ export class AuthController {
     return result.data;
   }
 
-  @SkipThrottle()
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('login')
