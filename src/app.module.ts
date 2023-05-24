@@ -42,6 +42,7 @@ import { CreateUserByAdminUseCases } from './super_admin/sa_users/applications/u
 import { DeleteUserUseCases } from './super_admin/sa_users/applications/use-cases/delete-user-use-cases';
 import { SAUsersRepository } from './super_admin/sa_users/sa-users.repository';
 import { TypeOrmConfig } from './configs/type-orm.config';
+import { PostsController } from './public/posts/posts.controller';
 
 const useCases = [
   BanUserUseCases,
@@ -75,6 +76,7 @@ const repositories = [SAUsersRepository, AuthRepository, DevicesRepository];
 const services = [AuthService, AppService, SAUsersService, DevicesService];
 const adapters = [EmailAdapter];
 const controllers = [
+  PostsController,
   AppController,
   TestingController,
   SAUsersController,

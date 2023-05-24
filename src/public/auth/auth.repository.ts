@@ -45,14 +45,14 @@ export class AuthRepository {
     return result[0];
   }
 
-  /*async countBannedUsersInIdArray(ids: Types.ObjectId[]) {
+  /*async countBannedUsersInIdArray(ids: string[]) {
     return this.userModel.countDocuments({
       _id: { $in: ids },
       'banInformation.isBanned': true,
     });
   }*/
 
-  /*async allIdBannedUsers(ids: Types.ObjectId[]) {
+  /*async allIdBannedUsers(ids: string[]) {
     return this.userModel.find({
       _id: { $in: ids },
       'banInformation.isBanned': true,

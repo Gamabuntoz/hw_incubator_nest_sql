@@ -6,7 +6,7 @@ export class TryObjectIdPipe implements PipeTransform {
   transform(value: any) {
     let newValue;
     try {
-      newValue = new Types.ObjectId(value);
+      newValue = new string(value);
     } catch (e) {
       throw new NotFoundException();
     }

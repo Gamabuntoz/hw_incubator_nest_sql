@@ -49,7 +49,7 @@ export class SAUsersRepository {
     const searchEmailTerm = filter.searchEmailTerm
       ? filter.searchEmailTerm
       : null;
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
       SELECT COUNT("users") 
       FROM public."users"
@@ -59,6 +59,7 @@ export class SAUsersRepository {
       `,
       [banStatus, searchLoginTerm, searchEmailTerm],
     );
+    return result[0].count;
   }
 
   async createUser(newUser: Users) {
@@ -112,15 +113,6 @@ export class SAUsersRepository {
     );
     return result[1] === 1;
   }
-
-  /*async findUserByLoginOrEmail(loginOrEmail: string) {
-    return this.userModel.findOne({
-      $or: [
-        { 'accountData.login': loginOrEmail },
-        { 'accountData.email': loginOrEmail },
-      ],
-    });
-  }*/
 
   async deleteUser(id: string) {
     const result = await this.dataSource.query(

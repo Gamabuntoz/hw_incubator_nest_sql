@@ -25,7 +25,7 @@ export class SAUsersService {
     const paginatedUsers = await Paginated.getPaginated<SAUserInfoDTO[]>({
       pageNumber: queryData.pageNumber,
       pageSize: queryData.pageSize,
-      totalCount: totalCount[0].count,
+      totalCount: totalCount,
       items: findAllUsers.map(
         (u) =>
           new SAUserInfoDTO(u.id, u.login, u.email, u.createdAt, {
