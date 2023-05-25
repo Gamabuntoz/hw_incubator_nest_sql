@@ -35,7 +35,7 @@ export class SABlogsRepository {
     return this.dataSource.query(
       `
       SELECT * FROM "blogs" 
-      WHERE ($1::VARCHAR IS NULL OR LOWER("name") ILIKE  '%' || $2::VARCHAR || '%')
+      WHERE ($1::VARCHAR IS NULL OR LOWER("name") ILIKE  '%' || $1::VARCHAR || '%')
       ORDER BY "${sortBy}" ${queryData.sortDirection}
       LIMIT $2
       OFFSET $3

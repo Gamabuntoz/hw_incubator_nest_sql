@@ -43,10 +43,8 @@ export class SABlogsService {
               userLogin: b.ownerLogin,
             },
             {
-              isBanned: b.banInformation.isBanned,
-              banDate: b.banInformation.banDate
-                ? b.banInformation.banDate.toISOString()
-                : null,
+              isBanned: b.blogIsBanned,
+              banDate: b.blogBanDate ? b.blogBanDate : null,
             },
           ),
       ),
