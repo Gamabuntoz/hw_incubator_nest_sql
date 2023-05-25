@@ -12,6 +12,8 @@ export class BanUserForBlog {
   isBanned: boolean;
   @Column({ nullable: true })
   banDate: string | null;
+  @Column()
+  createdAt: string;
   @Column({ nullable: true })
   banReason: string | null;
   @ManyToOne(() => Users, (User) => User.id, { cascade: true })

@@ -32,12 +32,13 @@ export class BloggerUsersRepository {
     await this.dataSource.query(
       `
       INSERT INTO "ban_user_for_blog"
-      VALUES ($1, $2, $3, $4, $5, $6, $7);
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
       `,
       [
         newBannedUserStatus.id,
         newBannedUserStatus.isBanned,
         newBannedUserStatus.banDate,
+        newBannedUserStatus.createdAt,
         newBannedUserStatus.banReason,
         newBannedUserStatus.userLogin,
         newBannedUserStatus.blog,

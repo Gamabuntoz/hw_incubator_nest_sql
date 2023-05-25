@@ -50,6 +50,7 @@ export class BanUserForBlogUseCases
       id: uuidv4(),
       blog: command.inputData.blogId,
       isBanned: command.inputData.isBanned,
+      createdAt: new Date().toISOString(),
       banDate: command.inputData.isBanned ? new Date().toISOString() : null,
       banReason: command.inputData.banReason
         ? command.inputData.banReason
