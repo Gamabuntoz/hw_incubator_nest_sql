@@ -6,6 +6,7 @@ import { BloggerUsersRepository } from '../../blogger-users.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { BanUserForBlog } from '../banned-users-for-blogs.entity';
 import { AuthRepository } from '../../../../public/auth/auth.repository';
+import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class BanUserForBlogCommand {
   constructor(
@@ -33,7 +34,9 @@ export class BanUserForBlogUseCases
       return new Result<boolean>(ResultCode.NotFound, false, 'Blog not found');
     if (blog.ownerId !== command.currentUserId)
       return new Result<boolean>(ResultCode.Forbidden, false, 'Access denied');
-    const bannedUser = await this.authRepository.findUserById(command.userId);
+    const bannedUser: Users = await this.authRepository.findUserById(
+      command.userId,
+    );
     if (!bannedUser)
       return new Result<boolean>(ResultCode.NotFound, false, 'User not found');
     const updateBanStatus =
@@ -52,7 +55,7 @@ export class BanUserForBlogUseCases
         ? command.inputData.banReason
         : null,
       user: command.userId,
-      userLogin: bannedUser.accountData.login,
+      userLogin: bannedUser.login,
     };
     await this.bloggerUsersRepository.createBannedUserStatusForBlog(
       newBannedStatus,
