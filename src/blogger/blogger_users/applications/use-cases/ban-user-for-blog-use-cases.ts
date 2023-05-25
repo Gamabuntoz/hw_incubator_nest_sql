@@ -39,13 +39,17 @@ export class BanUserForBlogUseCases
     );
     if (!bannedUser)
       return new Result<boolean>(ResultCode.NotFound, false, 'User not found');
-    const updateBanStatus =
+    const checkUserForBan = await this.bloggerUsersRepository.checkUserForBan(
+      command.userId,
+      command.inputData.blogId,
+    );
+    if (checkUserForBan) {
       await this.bloggerUsersRepository.updateBannedUserStatusForBlog(
         command.userId,
         command.inputData,
       );
-    if (updateBanStatus)
       return new Result<boolean>(ResultCode.Success, true, null);
+    }
     const newBannedStatus: BanUserForBlog = {
       id: uuidv4(),
       blog: command.inputData.blogId,

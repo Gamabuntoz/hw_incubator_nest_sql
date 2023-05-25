@@ -54,7 +54,7 @@ export class BloggerUsersService {
         (b) =>
           new BannedUsersForBlogInfoDTO(b.userId, b.userLogin, {
             isBanned: b.isBanned,
-            banDate: b.banDate.toISOString(),
+            banDate: b.banDate,
             banReason: b.banReason,
           }),
       ),

@@ -68,13 +68,14 @@ export class BloggerUsersRepository {
     userId: string,
     blogId: string,
   ): Promise<BanUserForBlog> {
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
       SELECT * FROM "ban_user_for_blog"
       WHERE "userId" = $1 AND "blogId" = $2
       `,
       [userId, blogId],
     );
+    return result[0];
   }
 
   async findAllBannedUsersForBlog(
@@ -101,7 +102,7 @@ export class BloggerUsersRepository {
       OFFSET $4
       `,
       [
-        filter.ownerId,
+        filter.blogId,
         searchLoginTerm,
         queryData.pageSize,
         (queryData.pageNumber - 1) * queryData.pageSize,
