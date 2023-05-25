@@ -32,7 +32,7 @@ export class SABlogsService {
       items: allBlogs.map(
         (b) =>
           new BlogInfoDTO(
-            b._id.toString(),
+            b.id,
             b.name,
             b.description,
             b.websiteUrl,

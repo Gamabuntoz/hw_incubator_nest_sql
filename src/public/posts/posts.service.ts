@@ -21,7 +21,7 @@ export class PostsService {
   ): Promise<Result<Paginated<PostInfoDTO[]>>> {
     const allBannedBlogs =
       await this.bloggerBlogsRepository.findAllBannedBlogs();
-    const allBannedBlogsId = allBannedBlogs.map((b) => b._id.toString());
+    const allBannedBlogsId = allBannedBlogs.map((b) => b.id);
     const totalCount = await this.postsRepository.totalCountPostsExpectBanned(
       allBannedBlogsId,
     );
