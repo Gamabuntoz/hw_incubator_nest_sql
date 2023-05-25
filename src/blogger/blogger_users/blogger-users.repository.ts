@@ -38,11 +38,11 @@ export class BloggerUsersRepository {
         newBannedUserStatus.id,
         newBannedUserStatus.isBanned,
         newBannedUserStatus.banDate,
-        newBannedUserStatus.createdAt,
         newBannedUserStatus.banReason,
         newBannedUserStatus.userLogin,
         newBannedUserStatus.blog,
         newBannedUserStatus.user,
+        newBannedUserStatus.createdAt,
       ],
     );
     return newBannedUserStatus;
