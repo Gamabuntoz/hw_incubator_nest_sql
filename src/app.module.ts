@@ -65,10 +65,14 @@ import { DeletePostUseCases } from './blogger/blogger_blogs/applications/use-cas
 import { UpdateBlogUseCases } from './blogger/blogger_blogs/applications/use-cases/update-blog-use-cases';
 import { UpdatePostUseCases } from './blogger/blogger_blogs/applications/use-cases/update-post-by-blog-id-use-cases';
 import { BanUserForBlogUseCases } from './blogger/blogger_users/applications/use-cases/ban-user-for-blog-use-cases';
+import { BanBlogByIdUseCases } from './super_admin/sa_blogs/applications/use-cases/ban-blog-by-id-use-cases';
+import { BindBlogWithUserUseCases } from './super_admin/sa_blogs/applications/use-cases/bind-blog-with-user-use-cases';
 
 const useCases = [
   BanUserForBlogUseCases,
   BanUserUseCases,
+  BanBlogByIdUseCases,
+  BindBlogWithUserUseCases,
   CreateUserByAdminUseCases,
   CreateBlogUseCases,
   CreatePostWithBlogIdUseCases,
