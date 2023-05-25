@@ -22,7 +22,7 @@ export class SABlogsRepository {
     const result = await this.dataSource.query(
       `
       UPDATE "blogs"
-      SET "blogIsBaned" = $1, "blogBanDate" = $2
+      SET "blogIsBanned" = $1, "blogBanDate" = $2
       WHERE id = $3
       `,
       [status, status ? new Date().toISOString() : null, id],
