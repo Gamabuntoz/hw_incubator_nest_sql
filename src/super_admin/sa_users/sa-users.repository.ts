@@ -23,7 +23,7 @@ export class SAUsersRepository {
       : null;
     return this.dataSource.query(
       `
-      SELECT * FROM public."users" 
+      SELECT * FROM "users" 
       WHERE ("userIsBanned" = $1::BOOLEAN OR $1::BOOLEAN IS NULL) AND
         (($2::VARCHAR IS NULL OR LOWER("login") ILIKE  '%' || $2::VARCHAR || '%')  OR
         ($3::VARCHAR IS NULL OR LOWER("email") ILIKE  '%' || $3::VARCHAR || '%'))
@@ -52,7 +52,7 @@ export class SAUsersRepository {
     const result = await this.dataSource.query(
       `
       SELECT COUNT("users") 
-      FROM public."users"
+      FROM "users"
       WHERE ($1::BOOLEAN IS NULL OR "userIsBanned" = $1::BOOLEAN) AND
         (($2::VARCHAR is null OR LOWER("login") ILIKE  '%' || $2::VARCHAR || '%')  or
         ($3::VARCHAR is null OR LOWER("email") ILIKE  '%' || $3::VARCHAR || '%'))
@@ -88,13 +88,14 @@ export class SAUsersRepository {
   }
 
   async findUserById(id: string) {
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
       SELECT * FROM "users"
       WHERE "id" = $1
       `,
       [id],
     );
+    return result[0];
   }
 
   async updateUserBanStatus(userId: string, inputData: InputBanUserDTO) {

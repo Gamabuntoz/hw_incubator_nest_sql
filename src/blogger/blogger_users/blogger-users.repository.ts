@@ -19,7 +19,7 @@ export class BloggerUsersRepository {
     const banDate = inputData.isBanned ? new Date() : null;
     const result = await this.dataSource.query(
       `
-      UPDATE "banuserforblog"
+      UPDATE "ban_user_for_blog"
       SET "isBanned" = $1, "banReason" = $2, "banDate" = $3
       WHERE "userId" = $4 AND "blogId" = $5
       `,
@@ -31,17 +31,17 @@ export class BloggerUsersRepository {
   async createBannedUserStatusForBlog(newBannedUserStatus: BanUserForBlog) {
     await this.dataSource.query(
       `
-      INSERT INTO "banuserforblog"
+      INSERT INTO "ban_user_for_blog"
       VALUES ($1, $2, $3, $4, $5, $6, $7);
       `,
       [
         newBannedUserStatus.id,
-        newBannedUserStatus.blog,
         newBannedUserStatus.isBanned,
         newBannedUserStatus.banDate,
         newBannedUserStatus.banReason,
-        newBannedUserStatus.user,
         newBannedUserStatus.userLogin,
+        newBannedUserStatus.blog,
+        newBannedUserStatus.user,
       ],
     );
     return newBannedUserStatus;
@@ -53,8 +53,8 @@ export class BloggerUsersRepository {
       : null;
     const result = await this.dataSource.query(
       `
-      SELECT COUNT("banuserforblog") 
-      FROM public."banuserforblog"
+      SELECT COUNT("ban_user_for_blog") 
+      FROM "ban_user_for_blog"
       WHERE "blogId" = $1 AND "isBanned" = true AND 
         ($2::VARCHAR is null OR LOWER("userLogin") ILIKE  '%' || $2::VARCHAR || '%')
       `,
@@ -69,7 +69,7 @@ export class BloggerUsersRepository {
   ): Promise<BanUserForBlog> {
     return this.dataSource.query(
       `
-      SELECT * FROM public."banuserforblog"
+      SELECT * FROM "ban_user_for_blog"
       WHERE "userId" = $1 AND "blogId" = $2
       `,
       [userId, blogId],
@@ -92,7 +92,7 @@ export class BloggerUsersRepository {
       : null;
     return this.dataSource.query(
       `
-      SELECT * FROM public."banuserforblog" 
+      SELECT * FROM "ban_user_for_blog" 
       WHERE "blogId" = $1 AND "isBanned" = true AND 
         ($2::VARCHAR is null OR LOWER("userLogin") ILIKE  '%' || $2::VARCHAR || '%')
       ORDER BY "${sortBy}" ${queryData.sortDirection}

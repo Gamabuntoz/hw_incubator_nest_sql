@@ -3,9 +3,9 @@ import { BloggerBlogsRepository } from '../../blogger-blogs.repository';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Result, ResultCode } from '../../../../helpers/contract';
 import { Blogs } from '../blogger-blogs.entity';
-import { SAUsersRepository } from '../../../../super_admin/sa_users/sa-users.repository';
 import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 import { v4 as uuidv4 } from 'uuid';
+import { AuthRepository } from '../../../../public/auth/auth.repository';
 
 export class CreateBlogCommand {
   constructor(public inputData: InputBlogDTO, public currentUserId: string) {}
@@ -15,13 +15,13 @@ export class CreateBlogCommand {
 export class CreateBlogUseCases implements ICommandHandler<CreateBlogCommand> {
   constructor(
     private bloggerBlogsRepository: BloggerBlogsRepository,
-    private saUsersRepository: SAUsersRepository,
+    private authRepository: AuthRepository,
   ) {}
 
   async execute(
     command: CreateBlogCommand,
   ): Promise<Result<BloggerBlogInfoDTO>> {
-    const user: Users = await this.saUsersRepository.findUserById(
+    const user: Users = await this.authRepository.findUserById(
       command.currentUserId,
     );
     const newBlog: Blogs = {

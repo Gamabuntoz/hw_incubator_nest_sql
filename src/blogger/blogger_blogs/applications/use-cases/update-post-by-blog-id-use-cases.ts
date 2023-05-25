@@ -1,9 +1,7 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
-import { Types } from 'mongoose';
 import { PostsRepository } from '../../../../public/posts/posts.repository';
 import { InputPostDTO } from '../../../../public/posts/applications/posts.dto';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { Blogs } from '../blogger-blogs.entity';
 import { BloggerBlogsRepository } from '../../blogger-blogs.repository';
 
 export class UpdatePostCommand {
@@ -23,12 +21,10 @@ export class UpdatePostUseCases implements ICommandHandler<UpdatePostCommand> {
   ) {}
 
   async execute(command: UpdatePostCommand): Promise<Result<boolean>> {
-    const blog: Blogs = await this.bloggerBlogsRepository.findBlogById(
-      command.blogId,
-    );
+    const blog = await this.bloggerBlogsRepository.findBlogById(command.blogId);
     if (!blog)
       return new Result<boolean>(ResultCode.NotFound, false, 'Blog not found');
-    if (blog.owner !== command.currentUserId)
+    if (blog.ownerId !== command.currentUserId)
       return new Result<boolean>(ResultCode.Forbidden, false, 'Access denied');
     const updatedPost = await this.postsRepository.updatePost(
       command.postId,

@@ -5,9 +5,9 @@ import {
 import { PostsRepository } from '../../../../public/posts/posts.repository';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Result, ResultCode } from '../../../../helpers/contract';
-import { Blogs } from '../blogger-blogs.entity';
 import { BloggerBlogsRepository } from '../../blogger-blogs.repository';
 import { v4 as uuidv4 } from 'uuid';
+import { Posts } from '../../../../public/posts/applications/posts.entity';
 
 export class CreatePostWithBlogIdCommand {
   constructor(
@@ -29,7 +29,7 @@ export class CreatePostWithBlogIdUseCases
   async execute(
     command: CreatePostWithBlogIdCommand,
   ): Promise<Result<PostInfoDTO>> {
-    const blogById: Blogs = await this.bloggerBlogsRepository.findBlogById(
+    const blogById = await this.bloggerBlogsRepository.findBlogById(
       command.blogId,
     );
     if (!blogById)
@@ -38,18 +38,18 @@ export class CreatePostWithBlogIdUseCases
         null,
         'Blog not found',
       );
-    if (blogById.owner !== command.currentUserId)
+    if (blogById.ownerId !== command.currentUserId)
       return new Result<PostInfoDTO>(
         ResultCode.Forbidden,
         null,
         'Access denied',
       );
-    const newPost = {
+    const newPost: Posts = {
       id: uuidv4(),
       title: command.inputData.title,
       shortDescription: command.inputData.shortDescription,
       content: command.inputData.content,
-      blogId: blogById.id,
+      blog: blogById.id,
       blogName: blogById.name,
       createdAt: new Date().toISOString(),
       likeCount: 0,
@@ -61,7 +61,7 @@ export class CreatePostWithBlogIdUseCases
       newPost.title,
       newPost.shortDescription,
       newPost.content,
-      newPost.blogId,
+      newPost.blog,
       newPost.blogName,
       newPost.createdAt,
       {

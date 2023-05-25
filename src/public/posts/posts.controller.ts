@@ -11,8 +11,6 @@ import { PostsService } from './posts.service';
 import { QueryPostsDTO } from './applications/posts.dto';
 import { CurrentUserId } from '../../helpers/decorators/current-user.param.decorator';
 import { OptionalJwtAuthGuard } from '../../security/guards/optional-jwt-auth.guard';
-import { TryObjectIdPipe } from '../../helpers/decorators/try-object-id.param.decorator';
-import { Types } from 'mongoose';
 import { CommandBus } from '@nestjs/cqrs';
 
 import { Result, ResultCode } from '../../helpers/contract';
@@ -44,12 +42,12 @@ export class PostsController {
 
   @UseGuards(OptionalJwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @Get(':id')
+  @Get(':postId')
   async findPostById(
-    @Param('id', new TryObjectIdPipe()) id: string,
+    @Param('postId') postId: string,
     @CurrentUserId() currentUserId,
   ) {
-    const result = await this.postsService.findPostById(id, currentUserId);
+    const result = await this.postsService.findPostById(postId, currentUserId);
     if (result.code !== ResultCode.Success) {
       Result.sendResultError(result.code);
     }

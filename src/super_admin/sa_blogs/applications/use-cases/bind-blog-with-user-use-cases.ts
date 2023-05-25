@@ -2,7 +2,6 @@ import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { Result, ResultCode } from '../../../../helpers/contract';
 import { SABlogsRepository } from '../../sa-blogs.repository';
 import { SAUsersRepository } from '../../../sa_users/sa-users.repository';
-import { Blog } from '../../../../blogger/blogger_blogs/applications/blogger-blogs.entity';
 
 export class BindBlogWithUserCommand {
   constructor(public blogId: string, public userId: string) {}
@@ -18,9 +17,7 @@ export class BindBlogWithUserUseCases
   ) {}
 
   async execute(command: BindBlogWithUserCommand): Promise<Result<boolean>> {
-    const blog: Blog = await this.saBlogsRepository.findBlogById(
-      command.blogId,
-    );
+    const blog = await this.saBlogsRepository.findBlogById(command.blogId);
     if (!blog)
       return new Result<boolean>(ResultCode.NotFound, false, 'blog not found');
     if (blog.ownerId)

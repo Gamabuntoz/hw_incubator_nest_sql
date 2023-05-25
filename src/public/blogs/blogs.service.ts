@@ -3,10 +3,10 @@ import { BlogsRepository } from './blogs.repository';
 import { PostsRepository } from '../posts/posts.repository';
 import { PostsService } from '../posts/posts.service';
 import { PostInfoDTO, QueryPostsDTO } from '../posts/applications/posts.dto';
-import { Types } from 'mongoose';
 import { BlogInfoDTO, QueryBlogsDTO } from './applications/blogs.dto';
 import { Result, ResultCode } from '../../helpers/contract';
 import { Paginated } from '../../helpers/paginated';
+import { Blogs } from '../../blogger/blogger_blogs/applications/blogger-blogs.entity';
 
 @Injectable()
 export class BlogsService {
@@ -28,11 +28,9 @@ export class BlogsService {
         null,
         'Blog not found',
       );
-    const totalCount = await this.postsRepository.totalCountPostsByBlogId(
-      id.toString(),
-    );
+    const totalCount = await this.postsRepository.totalCountPostsByBlogId(id);
     const allPosts = await this.postsRepository.findAllPostsByBlogId(
-      id.toString(),
+      id,
       queryData,
     );
     const paginatedPosts = await Paginated.getPaginated<PostInfoDTO[]>({
@@ -41,33 +39,7 @@ export class BlogsService {
       totalCount,
       items: await Promise.all(
         allPosts.map(async (p) => {
-          let likeStatusCurrentUser;
-          const countBannedLikesOwner =
-            await this.postsService.countBannedStatusOwner(p._id, 'Like');
-          const countBannedDislikesOwner =
-            await this.postsService.countBannedStatusOwner(p._id, 'Dislike');
-          const idBannedUsers = await this.postsService.idBannedStatusOwner(
-            p._id,
-            'Like',
-          );
-          if (userId) {
-            likeStatusCurrentUser =
-              await this.postsRepository.findPostLikeByPostAndUserId(
-                p._id.toString(),
-                userId,
-              );
-          }
-          const lastPostLikes = await this.postsRepository.findLastPostLikes(
-            p._id.toString(),
-            idBannedUsers,
-          );
-          return this.postsService.createPostViewInfo(
-            p,
-            lastPostLikes,
-            likeStatusCurrentUser,
-            countBannedLikesOwner,
-            countBannedDislikesOwner,
-          );
+          return this.postsService.createPostViewInfo(p);
         }),
       ),
     });
@@ -81,21 +53,13 @@ export class BlogsService {
   async findAllBlogs(
     queryData: QueryBlogsDTO,
   ): Promise<Result<Paginated<BlogInfoDTO[]>>> {
-    let filter: any = { 'banInformation.isBanned': false };
-    if (queryData.searchNameTerm) {
-      filter = {
-        'banInformation.isBanned': false,
-        name: { $regex: queryData.searchNameTerm, $options: 'i' },
-      };
-    }
-    let sort = 'createdAt';
-    if (queryData.sortBy) {
-      sort = queryData.sortBy;
-    }
+    const filter: any = { blogIsBanned: false };
+    filter['searchNameTerm'] = queryData.searchNameTerm
+      ? queryData.searchNameTerm
+      : null;
     const totalCount = await this.blogsRepository.totalCountBlogs(filter);
-    const allBlogs = await this.blogsRepository.findAllBlogs(
+    const allBlogs: Blogs[] = await this.blogsRepository.findAllBlogs(
       filter,
-      sort,
       queryData,
     );
     const paginatedBlogs = await Paginated.getPaginated<BlogInfoDTO[]>({
@@ -105,7 +69,7 @@ export class BlogsService {
       items: allBlogs.map(
         (b) =>
           new BlogInfoDTO(
-            b._id.toString(),
+            b.id,
             b.name,
             b.description,
             b.websiteUrl,
@@ -122,15 +86,15 @@ export class BlogsService {
   }
 
   async findBlogById(id: string): Promise<Result<BlogInfoDTO>> {
-    const blogById = await this.blogsRepository.findBlogById(id);
-    if (!blogById || blogById.banInformation.isBanned)
+    const blogById: Blogs = await this.blogsRepository.findBlogById(id);
+    if (!blogById || blogById.blogIsBanned)
       return new Result<BlogInfoDTO>(
         ResultCode.NotFound,
         null,
         'Blog not found',
       );
     const blogView = new BlogInfoDTO(
-      blogById._id.toString(),
+      blogById.id,
       blogById.name,
       blogById.description,
       blogById.websiteUrl,

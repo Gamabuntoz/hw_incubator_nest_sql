@@ -8,13 +8,14 @@ export class SABlogsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
   async findBlogById(id: string) {
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
       SELECT * FROM "blogs"
       WHERE "id" = $1
       `,
       [id],
     );
+    return result[0];
   }
 
   async banBlogById(id: string, status: boolean) {
@@ -33,7 +34,7 @@ export class SABlogsRepository {
     const searchNameTerm = filter.searchNameTerm ? filter.searchNameTerm : null;
     return this.dataSource.query(
       `
-      SELECT * FROM public."blogs" 
+      SELECT * FROM "blogs" 
       WHERE ($1::VARCHAR IS NULL OR LOWER("name") ILIKE  '%' || $2::VARCHAR || '%')
       ORDER BY "${sortBy}" ${queryData.sortDirection}
       LIMIT $2
@@ -52,7 +53,7 @@ export class SABlogsRepository {
     const result = await this.dataSource.query(
       `
       SELECT COUNT("blogs") 
-      FROM public."blogs"
+      FROM "blogs"
       WHERE ($1::VARCHAR is null OR LOWER("name") ILIKE  '%' || $1::VARCHAR || '%')
       `,
       [searchNameTerm],

@@ -18,7 +18,7 @@ import { BindBlogWithUserCommand } from './applications/use-cases/bind-blog-with
 import { BanBlogByIdCommand } from './applications/use-cases/ban-blog-by-id-use-cases';
 
 @Controller('sa/blogs')
-export class SaBlogsController {
+export class SABlogsController {
   constructor(
     protected saBlogsService: SABlogsService,
     private commandBus: CommandBus,

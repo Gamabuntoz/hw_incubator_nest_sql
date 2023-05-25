@@ -14,7 +14,7 @@ export class Posts {
   @ManyToOne(() => Blogs, (Blog) => Blog.id, { cascade: true })
   blog: string;
   @Column()
-  blogName: boolean;
+  blogName: string;
   @Column()
   createdAt: string;
   @Column()

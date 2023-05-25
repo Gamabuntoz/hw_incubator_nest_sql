@@ -1,32 +1,58 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
 import { QueryBlogsDTO } from './applications/blogs.dto';
-import {
-  Blog,
-  BlogDocument,
-} from '../../blogger/blogger_blogs/applications/blogger-blogs.entity';
+import { InjectDataSource } from '@nestjs/typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class BlogsRepository {
-  constructor(@InjectModel(Blog.name) private blogModel: Model<BlogDocument>) {}
+  constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findAllBlogs(filter: any, sort: string, queryData: QueryBlogsDTO) {
-    return this.blogModel
-      .find(filter)
-      .sort({ [sort]: queryData.sortDirection === 'asc' ? 1 : -1 })
-      .skip((queryData.pageNumber - 1) * queryData.pageSize)
-      .limit(queryData.pageSize)
-      .lean();
+  async findAllBlogs(filter: any, queryData: QueryBlogsDTO) {
+    let sortBy = 'createdAt';
+    if (queryData.sortBy) {
+      sortBy = queryData.sortBy;
+    }
+    const searchNameTerm = filter.searchNameTerm ? filter.searchNameTerm : null;
+    return this.dataSource.query(
+      `
+      SELECT * FROM "blogs" 
+      WHERE "blogIsBanned" = $1 AND
+        ($2::VARCHAR is null OR LOWER("name") ILIKE  '%' || $2::VARCHAR || '%')
+      ORDER BY "${sortBy}" ${queryData.sortDirection}
+      LIMIT $3
+      OFFSET $4
+      `,
+      [
+        filter.blogIsBanned,
+        searchNameTerm,
+        queryData.pageSize,
+        (queryData.pageNumber - 1) * queryData.pageSize,
+      ],
+    );
   }
 
   async totalCountBlogs(filter: any) {
-    return this.blogModel.countDocuments(filter);
+    const searchNameTerm = filter.searchNameTerm ? filter.searchNameTerm : null;
+    const result = await this.dataSource.query(
+      `
+      SELECT COUNT("blogs") 
+      FROM "blogs"
+      WHERE "blogIsBanned" = $1 AND
+        ($2::VARCHAR is null OR LOWER("name") ILIKE  '%' || $2::VARCHAR || '%')
+      `,
+      [filter.blogIsBanned, searchNameTerm],
+    );
+    return result[0].count;
   }
 
   async findBlogById(id: string) {
-    return this.blogModel.findOne({
-      _id: id,
-    });
+    const result = await this.dataSource.query(
+      `
+      SELECT * FROM "blogs"
+      WHERE "id" = $1
+      `,
+      [id],
+    );
+    return result[0];
   }
 }

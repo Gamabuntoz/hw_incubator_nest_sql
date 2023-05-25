@@ -18,7 +18,6 @@ import { CommandBus } from '@nestjs/cqrs';
 import { JwtAccessAuthGuard } from 'src/security/guards/jwt-access-auth.guard';
 import { Result, ResultCode } from 'src/helpers/contract';
 import { CurrentUserId } from '../../helpers/decorators/current-user.param.decorator';
-import { TryObjectIdPipe } from '../../helpers/decorators/try-object-id.param.decorator';
 import { BanUserForBlogCommand } from './applications/use-cases/ban-user-for-blog-use-cases';
 
 @Controller('blogger/users')

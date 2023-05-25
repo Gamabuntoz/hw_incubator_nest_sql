@@ -3,7 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TestingController } from './testing/testing.controller';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule } from '@nestjs/config';
 import { AuthRepository } from './public/auth/auth.repository';
 import { PassportModule } from '@nestjs/passport';
 import { JwtModule } from '@nestjs/jwt';
@@ -43,11 +43,38 @@ import { DeleteUserUseCases } from './super_admin/sa_users/applications/use-case
 import { SAUsersRepository } from './super_admin/sa_users/sa-users.repository';
 import { TypeOrmConfig } from './configs/type-orm.config';
 import { PostsController } from './public/posts/posts.controller';
+import { BlogExistsRule } from './helpers/decorators/validate-blog-id.param.decorator';
+import { PostsRepository } from './public/posts/posts.repository';
+import { BlogsRepository } from './public/blogs/blogs.repository';
+import { BloggerUsersRepository } from './blogger/blogger_users/blogger-users.repository';
+import { SABlogsRepository } from './super_admin/sa_blogs/sa-blogs.repository';
+import { BloggerBlogsRepository } from './blogger/blogger_blogs/blogger-blogs.repository';
+import { BloggerUsersService } from './blogger/blogger_users/blogger-users.service';
+import { BloggerBlogsService } from './blogger/blogger_blogs/blogger-blogs.service';
+import { SABlogsService } from './super_admin/sa_blogs/sa-blogs.service';
+import { BlogsService } from './public/blogs/blogs.service';
+import { PostsService } from './public/posts/posts.service';
+import { BlogsController } from './public/blogs/blogs.controller';
+import { BloggerUsersController } from './blogger/blogger_users/blogger-users.controller';
+import { BloggerBlogsController } from './blogger/blogger_blogs/blogger-blogs.controller';
+import { SABlogsController } from './super_admin/sa_blogs/sa-blogs.controller';
+import { CreateBlogUseCases } from './blogger/blogger_blogs/applications/use-cases/create-blog-use-cases';
+import { CreatePostWithBlogIdUseCases } from './blogger/blogger_blogs/applications/use-cases/create-post-by-blog-id-use-cases';
+import { DeleteBlogUseCases } from './blogger/blogger_blogs/applications/use-cases/delete-blog-use-cases';
+import { DeletePostUseCases } from './blogger/blogger_blogs/applications/use-cases/delete-post-by-blog-id-use-cases';
+import { UpdateBlogUseCases } from './blogger/blogger_blogs/applications/use-cases/update-blog-use-cases';
+import { UpdatePostUseCases } from './blogger/blogger_blogs/applications/use-cases/update-post-by-blog-id-use-cases';
 
 const useCases = [
   BanUserUseCases,
   CreateUserByAdminUseCases,
+  CreateBlogUseCases,
+  CreatePostWithBlogIdUseCases,
+  DeleteBlogUseCases,
+  DeletePostUseCases,
   DeleteUserUseCases,
+  UpdateBlogUseCases,
+  UpdatePostUseCases,
   ConfirmEmailUseCases,
   LoginUserUseCases,
   LogoutUserUseCases,
@@ -67,13 +94,33 @@ const strategies = [
   OptionalJwtAuthGuard,
 ];
 const decorators = [
+  BlogExistsRule,
   LoginOrEmailExistRule,
   ValidatePasswordRecoveryCodeRule,
   ValidateRegistrationConfirmationCodeRule,
   ValidateEmailForResendCodeRule,
 ];
-const repositories = [SAUsersRepository, AuthRepository, DevicesRepository];
-const services = [AuthService, AppService, SAUsersService, DevicesService];
+const repositories = [
+  SAUsersRepository,
+  AuthRepository,
+  DevicesRepository,
+  PostsRepository,
+  BlogsRepository,
+  BloggerUsersRepository,
+  SABlogsRepository,
+  BloggerBlogsRepository,
+];
+const services = [
+  AuthService,
+  AppService,
+  SAUsersService,
+  DevicesService,
+  BloggerUsersService,
+  BloggerBlogsService,
+  SABlogsService,
+  BlogsService,
+  PostsService,
+];
 const adapters = [EmailAdapter];
 const controllers = [
   PostsController,
@@ -82,6 +129,10 @@ const controllers = [
   SAUsersController,
   AuthController,
   DevicesController,
+  BlogsController,
+  BloggerUsersController,
+  BloggerBlogsController,
+  SABlogsController,
 ];
 
 @Module({

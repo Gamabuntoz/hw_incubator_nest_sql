@@ -3,9 +3,9 @@ import { Result, ResultCode } from '../../../../helpers/contract';
 import { InputBanUserForBlogDTO } from '../blogger-users.dto';
 import { BloggerBlogsRepository } from '../../../blogger_blogs/blogger-blogs.repository';
 import { BloggerUsersRepository } from '../../blogger-users.repository';
-import { SAUsersRepository } from '../../../../super_admin/sa_users/sa-users.repository';
 import { v4 as uuidv4 } from 'uuid';
 import { BanUserForBlog } from '../banned-users-for-blogs.entity';
+import { AuthRepository } from '../../../../public/auth/auth.repository';
 
 export class BanUserForBlogCommand {
   constructor(
@@ -22,7 +22,7 @@ export class BanUserForBlogUseCases
   constructor(
     protected bloggerBlogsRepository: BloggerBlogsRepository,
     protected bloggerUsersRepository: BloggerUsersRepository,
-    protected usersRepository: SAUsersRepository,
+    protected authRepository: AuthRepository,
   ) {}
 
   async execute(command: BanUserForBlogCommand): Promise<Result<boolean>> {
@@ -33,7 +33,7 @@ export class BanUserForBlogUseCases
       return new Result<boolean>(ResultCode.NotFound, false, 'Blog not found');
     if (blog.ownerId !== command.currentUserId)
       return new Result<boolean>(ResultCode.Forbidden, false, 'Access denied');
-    const bannedUser = await this.usersRepository.findUserById(command.userId);
+    const bannedUser = await this.authRepository.findUserById(command.userId);
     if (!bannedUser)
       return new Result<boolean>(ResultCode.NotFound, false, 'User not found');
     const updateBanStatus =

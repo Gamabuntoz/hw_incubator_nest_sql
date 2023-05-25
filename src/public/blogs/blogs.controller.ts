@@ -11,9 +11,7 @@ import { QueryPostsDTO } from '../posts/applications/posts.dto';
 import { QueryBlogsDTO } from './applications/blogs.dto';
 import { OptionalJwtAuthGuard } from '../../security/guards/optional-jwt-auth.guard';
 import { CurrentUserId } from '../../helpers/decorators/current-user.param.decorator';
-import { TryObjectIdPipe } from '../../helpers/decorators/try-object-id.param.decorator';
 import { BlogsService } from './blogs.service';
-import { Types } from 'mongoose';
 import { Result, ResultCode } from '../../helpers/contract';
 
 @Controller('blogs')
@@ -26,14 +24,14 @@ export class BlogsController {
   //
   @UseGuards(OptionalJwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  @Get(':id/posts')
+  @Get(':blogId/posts')
   async findAllPostsByBlogId(
-    @Param('id', new TryObjectIdPipe()) id: string,
+    @Param('blogId') blogId: string,
     @Query() query: QueryPostsDTO,
     @CurrentUserId() currentUserId,
   ) {
     const result = await this.blogsService.findAllPostsByBlogId(
-      id,
+      blogId,
       query,
       currentUserId,
     );
@@ -54,9 +52,9 @@ export class BlogsController {
   }
 
   @HttpCode(HttpStatus.OK)
-  @Get(':id')
-  async findBlogById(@Param('id', new TryObjectIdPipe()) id: string) {
-    const result = await this.blogsService.findBlogById(id);
+  @Get(':blogId')
+  async findBlogById(@Param('blogId') blogId: string) {
+    const result = await this.blogsService.findBlogById(blogId);
     if (result.code !== ResultCode.Success) {
       Result.sendResultError(result.code);
     }

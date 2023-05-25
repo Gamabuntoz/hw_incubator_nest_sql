@@ -16,7 +16,7 @@ export class BloggerBlogsRepository {
     const searchNameTerm = filter.searchNameTerm ? filter.searchNameTerm : null;
     return this.dataSource.query(
       `
-      SELECT * FROM public."blogs" 
+      SELECT * FROM "blogs" 
       WHERE "ownerId" = $1 AND
         ($2::VARCHAR is null OR LOWER("name") ILIKE  '%' || $2::VARCHAR || '%')
       ORDER BY "${sortBy}" ${queryData.sortDirection}
@@ -35,7 +35,7 @@ export class BloggerBlogsRepository {
   async findAllBannedBlogs() {
     return this.dataSource.query(
       `
-      SELECT * FROM public."blogs"
+      SELECT * FROM "blogs"
       WHERE "blogIsBanned" = true
       `,
     );
@@ -46,7 +46,7 @@ export class BloggerBlogsRepository {
     const result = await this.dataSource.query(
       `
       SELECT COUNT("blogs") 
-      FROM public."blogs"
+      FROM "blogs"
       WHERE "ownerId" = $1 AND
         ($2::VARCHAR is null OR LOWER("name") ILIKE  '%' || $2::VARCHAR || '%')
       `,
@@ -56,20 +56,21 @@ export class BloggerBlogsRepository {
   }
 
   async findBlogById(id: string) {
-    return this.dataSource.query(
+    const result = await this.dataSource.query(
       `
-      SELECT * FROM public."blogs"
+      SELECT * FROM "blogs"
       WHERE "id" = $1
       `,
       [id],
     );
+    return result[0];
   }
 
   async createBlog(newBlog: Blogs) {
     await this.dataSource.query(
       `
-      INSERT INTO "users"
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
+      INSERT INTO "blogs"
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10);
       `,
       [
         newBlog.id,
@@ -78,10 +79,10 @@ export class BloggerBlogsRepository {
         newBlog.description,
         newBlog.websiteUrl,
         newBlog.isMembership,
-        newBlog.owner,
         newBlog.ownerLogin,
         newBlog.blogIsBanned,
         newBlog.blogBanDate,
+        newBlog.owner,
       ],
     );
     return newBlog;
