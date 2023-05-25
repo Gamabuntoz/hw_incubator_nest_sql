@@ -33,7 +33,7 @@ export class BloggerBlogsService {
       items: allBlogs.map(
         (b) =>
           new BloggerBlogInfoDTO(
-            b._id.toString(),
+            b.id,
             b.name,
             b.description,
             b.websiteUrl,
