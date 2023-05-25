@@ -91,13 +91,13 @@ export class PostsService {
     return allBannedUsers.map((u) => u._id.toString());
   }*/
 
-  async createPostViewInfo(post: Posts): Promise<PostInfoDTO> {
+  async createPostViewInfo(post): Promise<PostInfoDTO> {
     return new PostInfoDTO(
       post.id,
       post.title,
       post.shortDescription,
       post.content,
-      post.blog,
+      post.blogId,
       post.blogName,
       post.createdAt,
       {
