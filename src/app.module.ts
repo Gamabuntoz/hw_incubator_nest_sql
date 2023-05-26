@@ -67,8 +67,21 @@ import { UpdatePostUseCases } from './blogger/blogger_blogs/applications/use-cas
 import { BanUserForBlogUseCases } from './blogger/blogger_users/applications/use-cases/ban-user-for-blog-use-cases';
 import { BanBlogByIdUseCases } from './super_admin/sa_blogs/applications/use-cases/ban-blog-by-id-use-cases';
 import { BindBlogWithUserUseCases } from './super_admin/sa_blogs/applications/use-cases/bind-blog-with-user-use-cases';
+import { CommentsController } from './public/comments/comments.controller';
+import { CommentsService } from './public/comments/comments.service';
+import { UpdatePostLikeStatusUseCases } from './public/posts/applications/use-cases/update-post-like-status-use-cases';
+import { UpdateCommentUseCases } from './public/comments/applications/use-cases/update-comment-use-cases';
+import { UpdateCommentLikeStatusUseCases } from './public/comments/applications/use-cases/update-comment-like-status-use-cases';
+import { DeleteCommentUseCases } from './public/comments/applications/use-cases/delete-comment-use-cases';
+import { CreateCommentWithPostIdUseCases } from './public/comments/applications/use-cases/create-comment-whith-post-id-use-cases';
+import { CommentsRepository } from './public/comments/comments.repository';
 
 const useCases = [
+  CreateCommentWithPostIdUseCases,
+  DeleteCommentUseCases,
+  UpdateCommentLikeStatusUseCases,
+  UpdateCommentUseCases,
+  UpdatePostLikeStatusUseCases,
   BanUserForBlogUseCases,
   BanUserUseCases,
   BanBlogByIdUseCases,
@@ -107,6 +120,7 @@ const decorators = [
   ValidateEmailForResendCodeRule,
 ];
 const repositories = [
+  CommentsRepository,
   SAUsersRepository,
   AuthRepository,
   DevicesRepository,
@@ -117,6 +131,7 @@ const repositories = [
   BloggerBlogsRepository,
 ];
 const services = [
+  CommentsService,
   AuthService,
   AppService,
   SAUsersService,
@@ -129,6 +144,7 @@ const services = [
 ];
 const adapters = [EmailAdapter];
 const controllers = [
+  CommentsController,
   PostsController,
   AppController,
   TestingController,
