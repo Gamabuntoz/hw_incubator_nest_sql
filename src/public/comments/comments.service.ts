@@ -31,13 +31,11 @@ export class CommentsService {
         null,
         'Comment owner is banned',
       );
-
     const countBannedLikesOwner = await this.countBannedStatusOwner(id, 'Like');
     const countBannedDislikesOwner = await this.countBannedStatusOwner(
       id,
       'Dislike',
     );
-
     let likeStatusCurrentUser;
     if (userId) {
       likeStatusCurrentUser =
@@ -60,6 +58,7 @@ export class CommentsService {
       id,
       status,
     );
+    if (!allLikes[0]) return 0;
     const allUsersLikeOwner = allLikes.map((c) => c.userId);
     return this.authRepository.countBannedUsersInIdArray(allUsersLikeOwner);
   }
