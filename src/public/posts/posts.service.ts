@@ -193,7 +193,7 @@ export class PostsService {
           lastPostLikes.map(async (l) => {
             const user = await this.authRepository.findUserById(l.userId);
             return {
-              addedAt: l.addedAt.toISOString(),
+              addedAt: l.addedAt,
               userId: l.userId,
               login: user?.login,
             };
