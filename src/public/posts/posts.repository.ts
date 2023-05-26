@@ -163,6 +163,7 @@ export class PostsRepository {
       `,
       [likeStatus, postId, userId],
     );
+    await this.changeCountPostLike(postId);
     return result[1] === 1;
   }
 
