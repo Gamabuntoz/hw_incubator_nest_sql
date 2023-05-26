@@ -42,15 +42,6 @@ export class BloggerBlogsRepository {
     );
   }
 
-  async findAllBannedBlogs() {
-    return this.dataSource.query(
-      `
-      SELECT * FROM "blogs"
-      WHERE "blogIsBanned" = true
-      `,
-    );
-  }
-
   async totalCountBlogs(filter: any) {
     const searchNameTerm = filter.searchNameTerm ? filter.searchNameTerm : null;
     const result = await this.dataSource.query(

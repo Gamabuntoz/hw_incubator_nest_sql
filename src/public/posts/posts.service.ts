@@ -77,16 +77,8 @@ export class PostsService {
     queryData: QueryPostsDTO,
     userId?: string,
   ): Promise<Result<Paginated<PostInfoDTO[]>>> {
-    const allBannedBlogs =
-      await this.bloggerBlogsRepository.findAllBannedBlogs();
-    const allBannedBlogsId = allBannedBlogs.map((b) => b.id);
-    const totalCount = await this.postsRepository.totalCountPostsExpectBanned(
-      allBannedBlogsId,
-    );
-    const allPosts = await this.postsRepository.findAllPosts(
-      queryData,
-      allBannedBlogsId,
-    );
+    const totalCount = await this.postsRepository.totalCountPostsExpectBanned();
+    const allPosts = await this.postsRepository.findAllPosts(queryData);
     const paginatedPosts = await Paginated.getPaginated<PostInfoDTO[]>({
       pageNumber: queryData.pageNumber,
       pageSize: queryData.pageSize,
@@ -102,14 +94,12 @@ export class PostsService {
             p.id,
             'Dislike',
           );
-          const idBannedUsers = await this.idBannedStatusOwner(p, 'Like');
           if (userId) {
             likeStatusCurrentUser =
               await this.postsRepository.findPostLikeByPostAndUserId(p, userId);
           }
           const lastPostLikes = await this.postsRepository.findLastPostLikes(
-            p,
-            idBannedUsers,
+            p.id,
           );
           return this.createPostViewInfo(
             p,
@@ -129,10 +119,10 @@ export class PostsService {
   }
 
   async findPostById(
-    id: string,
+    postId: string,
     userId?: string,
   ): Promise<Result<PostInfoDTO>> {
-    const postById = await this.postsRepository.findPostById(id);
+    const postById = await this.postsRepository.findPostById(postId);
     if (!postById)
       return new Result<PostInfoDTO>(
         ResultCode.NotFound,
@@ -148,21 +138,20 @@ export class PostsService {
         null,
         'blog is banned',
       );
-    const countBannedLikesOwner = await this.countBannedStatusOwner(id, 'Like');
+    const countBannedLikesOwner = await this.countBannedStatusOwner(
+      postId,
+      'Like',
+    );
     const countBannedDislikesOwner = await this.countBannedStatusOwner(
-      id,
+      postId,
       'Dislike',
     );
-    const idBannedUsers = await this.idBannedStatusOwner(id, 'Like');
     let likeStatusCurrentUser;
     if (userId) {
       likeStatusCurrentUser =
-        await this.postsRepository.findPostLikeByPostAndUserId(id, userId);
+        await this.postsRepository.findPostLikeByPostAndUserId(postId, userId);
     }
-    const lastPostLikes = await this.postsRepository.findLastPostLikes(
-      id,
-      idBannedUsers,
-    );
+    const lastPostLikes = await this.postsRepository.findLastPostLikes(postId);
     const postView = await this.createPostViewInfo(
       postById,
       lastPostLikes,
@@ -173,19 +162,8 @@ export class PostsService {
     return new Result<PostInfoDTO>(ResultCode.Success, postView, null);
   }
 
-  async countBannedStatusOwner(id: string, status: string) {
-    const allLikes = await this.postsRepository.findAllPostLikes(id, status);
-    const allUsersLikeOwner = allLikes.map((p) => p.userId);
-    return this.authRepository.countBannedUsersInIdArray(allUsersLikeOwner);
-  }
-
-  async idBannedStatusOwner(id: string, status: string) {
-    const allLikes = await this.postsRepository.findAllPostLikes(id, status);
-    const allUsersLikeOwner = allLikes.map((p) => p.userId);
-    const allBannedUsers = await this.authRepository.allIdBannedUsers(
-      allUsersLikeOwner,
-    );
-    return allBannedUsers.map((u) => u.id);
+  async countBannedStatusOwner(postId: string, status: string) {
+    return this.authRepository.countBannedUsersPostLikeOwner(postId, status);
   }
 
   async createPostViewInfo(

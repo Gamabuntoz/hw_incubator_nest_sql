@@ -9,9 +9,7 @@ import { PostLikes } from './applications/posts-likes.entity';
 export class PostsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
-  async findAllPosts(queryData: QueryPostsDTO, bannedBlogsId?: string[]) {
-    const filter: any = {};
-    filter['bannedBlogsId'] = bannedBlogsId ? bannedBlogsId : null;
+  async findAllPosts(queryData: QueryPostsDTO) {
     let sortBy = 'createdAt';
     if (queryData.sortBy) {
       sortBy = queryData.sortBy;
@@ -19,16 +17,15 @@ export class PostsRepository {
     return this.dataSource.query(
       `
       SELECT * FROM "posts" 
-      WHERE ($1 is null OR "blogId" NOT IN $1)
+      WHERE "blogId" NOT IN (
+        SELECT "id" FROM "blogs"
+        WHERE "blogIsBanned" = true
+      )
       ORDER BY "${sortBy}" ${queryData.sortDirection}
-      LIMIT $2
-      OFFSET $3
+      LIMIT $1
+      OFFSET $2
       `,
-      [
-        filter.bannedBlogsId,
-        queryData.pageSize,
-        (queryData.pageNumber - 1) * queryData.pageSize,
-      ],
+      [queryData.pageSize, (queryData.pageNumber - 1) * queryData.pageSize],
     );
   }
 
@@ -49,16 +46,16 @@ export class PostsRepository {
     );
   }
 
-  async totalCountPostsExpectBanned(bannedBlogsId?: string[]) {
-    const filter: any = {};
-    filter['bannedBlogsId'] = bannedBlogsId ? bannedBlogsId : null;
+  async totalCountPostsExpectBanned() {
     const result = await this.dataSource.query(
       `
       SELECT COUNT("posts") 
       FROM "posts"
-      WHERE ($1 is null OR "blogId" NOT IN $1)
+      WHERE "blogId" NOT IN (
+        SELECT "id" FROM "blogs"
+        WHERE "blogIsBanned" = true
+      )
       `,
-      [filter.bannedBlogsId],
     );
     return result[0].count;
   }
@@ -145,16 +142,6 @@ export class PostsRepository {
     );
   }
 
-  async findAllPostLikes(id: string, status: string) {
-    return this.dataSource.query(
-      `
-      SELECT * FROM "post_likes" 
-      WHERE "postId" = $1 AND "status" = $2
-      `,
-      [id, status],
-    );
-  }
-
   async countLikePostStatusInfo(postId: string, status: string) {
     const result = await this.dataSource.query(
       `
@@ -197,15 +184,18 @@ export class PostsRepository {
     return newPostLike;
   }
 
-  async findLastPostLikes(postId: string, bannedUsers?: string[]) {
+  async findLastPostLikes(postId: string) {
     return this.dataSource.query(
       `
       SELECT * FROM "post_likes" 
-      WHERE "postId" = $1 AND "status" = "Like" AND "userID" NOT IN $2
+      WHERE "postId" = $1 AND "status" = 'Like' AND "userId" NOT IN (
+                SELECT "id" FROM "users" 
+                WHERE "userIsBanned" = true
+                )      
       ORDER BY "addedAt" DESC
       LIMIT 3
       `,
-      [postId, bannedUsers],
+      [postId],
     );
   }
 

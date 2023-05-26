@@ -45,25 +45,49 @@ export class AuthRepository {
     return result[0];
   }
 
-  async countBannedUsersInIdArray(ids: string[]) {
+  async countBannedUsersPostLikeOwner(postId: string, status: string) {
     const result = await this.dataSource.query(
       `
       SELECT COUNT("users") 
       FROM "users"
-      WHERE "id" IN $1 AND "userIsBanned" = true
+      WHERE "id" IN (
+            SELECT "userId" FROM "post_likes" 
+            WHERE "postId" = $1 AND "status" = $2
+            ) 
+            AND "userIsBanned" = true
       `,
-      [ids],
+      [postId, status],
     );
     return result[0].count;
   }
 
-  async allIdBannedUsers(ids: string[]) {
+  async countBannedUsersCommentLikeOwner(commentId: string, status: string) {
+    const result = await this.dataSource.query(
+      `
+      SELECT COUNT("users") 
+      FROM "users"
+      WHERE "id" IN (
+            SELECT "userId" FROM "comment_likes" 
+            WHERE "commentId" = $1 AND "status" = $2
+            ) 
+            AND "userIsBanned" = true
+      `,
+      [commentId, status],
+    );
+    return result[0].count;
+  }
+
+  async allIdBannedUsers(postId: string, status: string) {
     return this.dataSource.query(
       `
-      SELECT * FROM "users"
-      WHERE "id" IN $1 AND "userIsBanned" = true
+      SELECT "id" FROM "users"
+      WHERE "id" IN (
+                SELECT "userId" FROM "post_likes" 
+                WHERE "postId" = $1 AND "status" = $2
+            ) 
+            AND "userIsBanned" = true
       `,
-      [ids],
+      [postId, status],
     );
   }
 

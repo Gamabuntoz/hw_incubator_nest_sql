@@ -53,14 +53,11 @@ export class CommentsService {
     return new Result<CommentInfoDTO>(ResultCode.Success, commentView, null);
   }
 
-  async countBannedStatusOwner(id: string, status: string) {
-    const allLikes = await this.commentsRepository.findAllCommentLikes(
-      id,
+  async countBannedStatusOwner(commentId: string, status: string) {
+    return this.authRepository.countBannedUsersCommentLikeOwner(
+      commentId,
       status,
     );
-    if (!allLikes[0]) return 0;
-    const allUsersLikeOwner = allLikes.map((c) => c.userId);
-    return this.authRepository.countBannedUsersInIdArray(allUsersLikeOwner);
   }
 
   async createCommentViewInfo(

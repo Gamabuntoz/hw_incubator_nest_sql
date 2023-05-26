@@ -41,20 +41,15 @@ export class BlogsService {
         allPosts.map(async (p) => {
           let likeStatusCurrentUser;
           const countBannedLikesOwner =
-            await this.postsService.countBannedStatusOwner(p, 'Like');
+            await this.postsService.countBannedStatusOwner(p.id, 'Like');
           const countBannedDislikesOwner =
-            await this.postsService.countBannedStatusOwner(p, 'Dislike');
-          const idBannedUsers = await this.postsService.idBannedStatusOwner(
-            p,
-            'Like',
-          );
+            await this.postsService.countBannedStatusOwner(p.id, 'Dislike');
           if (userId) {
             likeStatusCurrentUser =
               await this.postsRepository.findPostLikeByPostAndUserId(p, userId);
           }
           const lastPostLikes = await this.postsRepository.findLastPostLikes(
-            p,
-            idBannedUsers,
+            p.id,
           );
           return this.postsService.createPostViewInfo(
             p,
