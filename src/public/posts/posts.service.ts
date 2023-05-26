@@ -96,7 +96,10 @@ export class PostsService {
           );
           if (userId) {
             likeStatusCurrentUser =
-              await this.postsRepository.findPostLikeByPostAndUserId(p, userId);
+              await this.postsRepository.findPostLikeByPostAndUserId(
+                p.id,
+                userId,
+              );
           }
           const lastPostLikes = await this.postsRepository.findLastPostLikes(
             p.id,

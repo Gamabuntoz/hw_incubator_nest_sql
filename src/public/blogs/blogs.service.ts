@@ -46,7 +46,10 @@ export class BlogsService {
             await this.postsService.countBannedStatusOwner(p.id, 'Dislike');
           if (userId) {
             likeStatusCurrentUser =
-              await this.postsRepository.findPostLikeByPostAndUserId(p, userId);
+              await this.postsRepository.findPostLikeByPostAndUserId(
+                p.id,
+                userId,
+              );
           }
           const lastPostLikes = await this.postsRepository.findLastPostLikes(
             p.id,
