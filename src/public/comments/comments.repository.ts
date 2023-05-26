@@ -73,7 +73,7 @@ export class CommentsRepository {
     await this.dataSource.query(
       `
       INSERT INTO "comment_likes"
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8);
+      VALUES ($1, $2, $3, $4, $5);
       `,
       [
         newCommentLike.id,
