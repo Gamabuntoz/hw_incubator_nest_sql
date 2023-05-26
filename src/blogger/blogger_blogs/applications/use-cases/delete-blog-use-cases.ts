@@ -13,7 +13,11 @@ export class DeleteBlogUseCases implements ICommandHandler<DeleteBlogCommand> {
   async execute(command: DeleteBlogCommand): Promise<Result<boolean>> {
     const blog = await this.bloggerBlogsRepository.findBlogById(command.id);
     if (!blog)
-      return new Result<boolean>(ResultCode.NotFound, false, 'Blog not found');
+      return new Result<boolean>(
+        ResultCode.NotFound,
+        false,
+        'Blog is not found',
+      );
     if (blog.ownerId !== command.currentUserId)
       return new Result<boolean>(ResultCode.Forbidden, false, 'Access denied');
     await this.bloggerBlogsRepository.deleteBlog(command.id);
