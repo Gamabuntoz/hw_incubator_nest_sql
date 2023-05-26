@@ -45,19 +45,27 @@ export class AuthRepository {
     return result[0];
   }
 
-  /*async countBannedUsersInIdArray(ids: string[]) {
-    return this.userModel.countDocuments({
-      _id: { $in: ids },
-      'banInformation.isBanned': true,
-    });
-  }*/
+  async countBannedUsersInIdArray(ids: string[]) {
+    const result = await this.dataSource.query(
+      `
+      SELECT COUNT("users") 
+      FROM "users"
+      WHERE "id" IN $1 AND "userIsBanned" = true
+      `,
+      [ids],
+    );
+    return result[0].count;
+  }
 
-  /*async allIdBannedUsers(ids: string[]) {
-    return this.userModel.find({
-      _id: { $in: ids },
-      'banInformation.isBanned': true,
-    });
-  }*/
+  async allIdBannedUsers(ids: string[]) {
+    return this.dataSource.query(
+      `
+      SELECT * FROM "users"
+      WHERE "id" IN $1 AND "userIsBanned" = true
+      `,
+      [ids],
+    );
+  }
 
   async findUserByLoginOrEmail(loginOrEmail: string) {
     const result = await this.dataSource.query(

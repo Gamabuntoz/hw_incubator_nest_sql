@@ -6,6 +6,9 @@ import { Devices } from '../public/devices/applications/devices.entity';
 import { Posts } from '../public/posts/applications/posts.entity';
 import { Blogs } from '../blogger/blogger_blogs/applications/blogger-blogs.entity';
 import { BanUserForBlog } from '../blogger/blogger_users/applications/banned-users-for-blogs.entity';
+import { PostLikes } from '../public/posts/applications/posts-likes.entity';
+import { Comments } from '../public/comments/applications/comments.entity';
+import { CommentLikes } from '../public/comments/applications/comments-likes.entity';
 
 @Injectable()
 export class TypeOrmConfig implements TypeOrmOptionsFactory {
@@ -16,7 +19,16 @@ export class TypeOrmConfig implements TypeOrmOptionsFactory {
       type: 'postgres',
       url: this.configService.get('DB_URL'),
       autoLoadEntities: true,
-      entities: [Users, Devices, Posts, Blogs, BanUserForBlog],
+      entities: [
+        Users,
+        Devices,
+        Posts,
+        Blogs,
+        BanUserForBlog,
+        PostLikes,
+        Comments,
+        CommentLikes,
+      ],
       synchronize: true,
     };
   }

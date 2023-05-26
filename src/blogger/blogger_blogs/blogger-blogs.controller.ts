@@ -11,7 +11,11 @@ import {
   Query,
   UseGuards,
 } from '@nestjs/common';
-import { InputBlogDTO, QueryBlogsDTO } from './applications/blogger-blogs.dto';
+import {
+  InputBlogDTO,
+  QueryBlogsDTO,
+  QueryCommentsDTO,
+} from './applications/blogger-blogs.dto';
 import { BloggerBlogsService } from './blogger-blogs.service';
 import { CreateBlogCommand } from './applications/use-cases/create-blog-use-cases';
 import { UpdateBlogCommand } from './applications/use-cases/update-blog-use-cases';
@@ -44,6 +48,23 @@ export class BloggerBlogsController {
     @CurrentUserId() currentUserId,
   ) {
     const result = await this.bloggerBlogsService.findAllBlogs(
+      queryData,
+      currentUserId,
+    );
+    if (result.code !== ResultCode.Success) {
+      Result.sendResultError(result.code);
+    }
+    return result.data;
+  }
+
+  @UseGuards(JwtAccessAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  @Get('comments')
+  async findAllCommentForBlogger(
+    @Query() queryData: QueryCommentsDTO,
+    @CurrentUserId() currentUserId,
+  ) {
+    const result = await this.bloggerBlogsService.findAllCommentForBlogger(
       queryData,
       currentUserId,
     );

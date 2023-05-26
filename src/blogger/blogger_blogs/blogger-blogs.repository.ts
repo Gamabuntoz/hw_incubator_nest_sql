@@ -8,6 +8,16 @@ import { DataSource } from 'typeorm';
 export class BloggerBlogsRepository {
   constructor(@InjectDataSource() protected dataSource: DataSource) {}
 
+  async findAllBlogsByOwnerId(ownerId) {
+    return this.dataSource.query(
+      `
+      SELECT * FROM "blogs" 
+      WHERE "ownerId" = $1
+      `,
+      [ownerId],
+    );
+  }
+
   async findAllBlogs(filter: any, queryData: QueryBlogsDTO) {
     let sortBy = 'createdAt';
     if (queryData.sortBy) {

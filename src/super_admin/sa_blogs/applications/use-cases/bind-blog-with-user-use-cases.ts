@@ -36,7 +36,7 @@ export class BindBlogWithUserUseCases
     await this.saBlogsRepository.bindBlogWithUser(
       command.blogId,
       command.userId,
-      user.accountData.login,
+      user.login,
     );
     return new Result<boolean>(ResultCode.Success, true, null);
   }

@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { Posts } from './applications/posts.entity';
 import { InputPostDTO, QueryPostsDTO } from './applications/posts.dto';
-import { PostLike } from './applications/posts-likes.schema';
 import { InjectDataSource } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
+import { PostLikes } from './applications/posts-likes.entity';
 
 @Injectable()
 export class PostsRepository {
@@ -135,61 +135,102 @@ export class PostsRepository {
     return result[1] === 1;
   }
 
-  /*async findAllPostsByBlogIds(blogIds: string[]) {
-    return this.postModel.find({ blogId: { $in: blogIds } });
-  }*/
-
-  /*async findAllPostLikes(id: string, status: string) {
-    return this.postLikeModel.find({
-      postId: id.toString(),
-      status: status,
-    });
-  }*/
-
-  /*async countLikePostStatusInfo(postId: string, status: string) {
-    return this.postLikeModel.countDocuments({
-      postId: postId,
-      status: status,
-    });
-  }*/
-
-  /*async updatePostLike(postId: string, likeStatus: string, userId: string) {
-    const result = await this.postLikeModel.updateOne(
-      { postId: postId, userId: userId },
-      { $set: { status: likeStatus } },
+  async findAllPostsByBlogIds(blogIds: string[]) {
+    return this.dataSource.query(
+      `
+      SELECT * FROM "posts" 
+      WHERE "blogId" IN $1
+      `,
+      [blogIds],
     );
-    await this.changeCountPostLike(postId);
-    return result.matchedCount === 1;
-  }*/
+  }
 
-  /*async setPostLike(newPostLike: PostLike) {
-    await this.postLikeModel.create(newPostLike);
-    await this.changeCountPostLike(newPostLike.postId);
+  async findAllPostLikes(id: string, status: string) {
+    return this.dataSource.query(
+      `
+      SELECT * FROM "post_likes" 
+      WHERE "postId" = $1 AND "status" = $2
+      `,
+      [id, status],
+    );
+  }
+
+  async countLikePostStatusInfo(postId: string, status: string) {
+    const result = await this.dataSource.query(
+      `
+      SELECT COUNT("post_likes") 
+      FROM "post_likes"
+      WHERE "postId" = $1 AND "status" = $2
+      `,
+      [postId, status],
+    );
+    return result[0].count;
+  }
+
+  async updatePostLike(postId: string, likeStatus: string, userId: string) {
+    const result = await this.dataSource.query(
+      `
+      UPDATE "post_likes"
+      SET "status" = $1
+      WHERE "postId" = $2 AND "userId" = $3
+      `,
+      [likeStatus, postId, userId],
+    );
+    return result[1] === 1;
+  }
+
+  async setPostLike(newPostLike: PostLikes) {
+    await this.dataSource.query(
+      `
+      INSERT INTO "post_likes"
+      VALUES ($1, $2, $3, $4, $5);
+      `,
+      [
+        newPostLike.id,
+        newPostLike.status,
+        newPostLike.addedAt,
+        newPostLike.user,
+        newPostLike.post,
+      ],
+    );
+    await this.changeCountPostLike(newPostLike.post);
     return newPostLike;
-  }*/
+  }
 
-  /*async findLastPostLikes(postId: string, bannedUsers?: string[]) {
-    return this.postLikeModel
-      .find({ postId: postId, status: 'Like', userId: { $nin: bannedUsers } })
-      .sort({ addedAt: -1 })
-      .limit(3)
-      .lean();
-  }*/
+  async findLastPostLikes(postId: string, bannedUsers?: string[]) {
+    return this.dataSource.query(
+      `
+      SELECT * FROM "post_likes" 
+      WHERE "postId" = $1 AND "status" = "Like" AND "userID" NOT IN $2
+      ORDER BY "addedAt" DESC
+      LIMIT 3
+      `,
+      [postId, bannedUsers],
+    );
+  }
 
-  /*async findPostLikeByPostAndUserId(postId: string, userId: string) {
-    return this.postLikeModel.findOne({
-      postId: postId,
-      userId: userId,
-    });
-  }*/
+  async findPostLikeByPostAndUserId(postId: string, userId: string) {
+    const result = await this.dataSource.query(
+      `
+      SELECT * FROM "post_likes"
+      WHERE "postId" = $1 AND "userId" = $2
+      `,
+      [postId, userId],
+    );
+    return result[0];
+  }
 
-  /*async changeCountPostLike(postId: string) {
+  async changeCountPostLike(postId: string) {
     const likeCount = await this.countLikePostStatusInfo(postId, 'Like');
     const dislikeCount = await this.countLikePostStatusInfo(postId, 'Dislike');
-    await this.postModel.updateOne(
-      { _id: new string(postId) },
-      { $set: { likeCount, dislikeCount } },
+    const result = await this.dataSource.query(
+      `
+      UPDATE "posts"
+      SET "likeCount" = $1, "dislikeCount" = $2
+      WHERE "id" = $3
+      `,
+      [likeCount, dislikeCount, postId],
     );
-    return;
-  }*/
+    return result[1] === 1;
+  }
 }
