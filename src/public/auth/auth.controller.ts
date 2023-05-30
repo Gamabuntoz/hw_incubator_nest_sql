@@ -46,9 +46,7 @@ export class AuthController {
     private commandBus: CommandBus,
   ) {}
   //
-  //
   // Query controller
-  //
   //
   @SkipThrottle()
   @UseGuards(JwtAccessAuthGuard)
