@@ -38,7 +38,7 @@ import { NewPasswordCommand } from './applications/use-cases/new-user-password-u
 import { PasswordRecoveryCommand } from './applications/use-cases/recovery-user-password-use-cases';
 import { Result, ResultCode } from '../../helpers/contract';
 
-@UseGuards(ThrottlerGuard)
+//@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
