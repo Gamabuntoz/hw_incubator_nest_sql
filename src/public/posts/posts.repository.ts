@@ -135,8 +135,12 @@ export class PostsRepository {
   async findAllPostsByBlogIds(blogIds: string[]) {
     return this.dataSource.query(
       `
-      SELECT * FROM "posts" 
-      WHERE "blogId" IN $1
+      SELECT "id" FROM "posts" 
+      WHERE "blogId" IN (   
+            SELECT "id"     
+            FROM "blogs" 
+            WHERE "ownerId" = $1
+            )
       `,
       [blogIds],
     );

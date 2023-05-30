@@ -156,8 +156,8 @@ export class CommentsRepository {
     );
   }
 
-  async findAllCommentsByPostIds(
-    postsIds: string[],
+  async findAllCommentsForAllBloggerBlogsAllPosts(
+    ownerId: string,
     queryData: QueryCommentsDTO,
   ) {
     let sortBy = 'createdAt';
@@ -167,13 +167,20 @@ export class CommentsRepository {
     return this.dataSource.query(
       `
       SELECT * FROM "comments" 
-      WHERE "postId" IN $1
+      WHERE "postId" IN (
+            SELECT "id" FROM "posts" 
+            WHERE "blogId" IN (   
+                    SELECT "id"     
+                    FROM "blogs" 
+                    WHERE "ownerId" = $1
+                    )
+            )
       ORDER BY "${sortBy}" ${queryData.sortDirection}
       LIMIT $2
       OFFSET $3
       `,
       [
-        postsIds,
+        ownerId,
         queryData.pageSize,
         (queryData.pageNumber - 1) * queryData.pageSize,
       ],
@@ -203,14 +210,21 @@ export class CommentsRepository {
     return result[0].count;
   }
 
-  async totalCountCommentsByPostsIds(postsIds: string[]) {
+  async totalCountCommentsForAllBloggerBlogsAllPosts(ownerId: string) {
     const result = await this.dataSource.query(
       `
       SELECT COUNT("comments") 
       FROM "comments"
-      WHERE "postId" IN $1
+      WHERE "postId" IN (
+            SELECT "id" FROM "posts" 
+            WHERE "blogId" IN (   
+                    SELECT "id"     
+                    FROM "blogs" 
+                    WHERE "ownerId" = $1
+                    )
+            )
       `,
-      [postsIds],
+      [ownerId],
     );
     return result[0].count;
   }

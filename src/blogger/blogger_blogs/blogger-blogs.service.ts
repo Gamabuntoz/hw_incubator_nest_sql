@@ -23,18 +23,15 @@ export class BloggerBlogsService {
     queryData: QueryCommentsDTO,
     currentUserId: string,
   ): Promise<Result<Paginated<BloggerCommentInfoDTO[]>>> {
-    const allBlogs = await this.bloggerBlogsRepository.findAllBlogsByOwnerId(
-      currentUserId,
-    );
-    const blogsIds = allBlogs.map((b) => b.id);
-    const allPosts = await this.postsRepository.findAllPostsByBlogIds(blogsIds);
-    const postsIds = allPosts.map((p) => p.id);
     const totalCount =
-      await this.commentsRepository.totalCountCommentsByPostsIds(postsIds);
-    const allComments = await this.commentsRepository.findAllCommentsByPostIds(
-      postsIds,
-      queryData,
-    );
+      await this.commentsRepository.totalCountCommentsForAllBloggerBlogsAllPosts(
+        currentUserId,
+      );
+    const allComments =
+      await this.commentsRepository.findAllCommentsForAllBloggerBlogsAllPosts(
+        currentUserId,
+        queryData,
+      );
     const paginatedBlogs = await Paginated.getPaginated<
       BloggerCommentInfoDTO[]
     >({
