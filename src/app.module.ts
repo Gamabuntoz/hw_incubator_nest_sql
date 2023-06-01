@@ -75,6 +75,7 @@ import { UpdateCommentLikeStatusUseCases } from './public/comments/applications/
 import { DeleteCommentUseCases } from './public/comments/applications/use-cases/delete-comment-use-cases';
 import { CreateCommentWithPostIdUseCases } from './public/comments/applications/use-cases/create-comment-whith-post-id-use-cases';
 import { CommentsRepository } from './public/comments/comments.repository';
+import { Users } from './super_admin/sa_users/applications/users.entity';
 
 const useCases = [
   CreateCommentWithPostIdUseCases,
@@ -174,6 +175,7 @@ const controllers = [
       useClass: TypeOrmConfig,
       imports: [ConfigModule],
     }),
+    TypeOrmModule.forFeature([Users]),
   ],
   controllers: [...controllers],
   providers: [

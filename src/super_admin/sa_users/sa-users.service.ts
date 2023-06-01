@@ -17,7 +17,7 @@ export class SAUsersService {
       queryData.searchEmailTerm,
       queryData.banStatus,
     );
-    const totalCount = await this.saUsersRepository.totalCountUsers(filter);
+    const totalCount = await this.saUsersRepository.totalCountUsers(queryData);
     const findAllUsers: Users[] = await this.saUsersRepository.findAllUsers(
       filter,
       queryData,
@@ -57,7 +57,7 @@ export class SAUsersService {
     }
 
     filter['searchEmailTerm'] = null;
-    if (searchLoginTerm) {
+    if (searchEmailTerm) {
       filter['searchEmailTerm'] = searchEmailTerm;
     }
 

@@ -77,20 +77,6 @@ export class AuthRepository {
     return result[0].count;
   }
 
-  async allIdBannedUsers(postId: string, status: string) {
-    return this.dataSource.query(
-      `
-      SELECT "id" FROM "users"
-      WHERE "id" IN (
-                SELECT "userId" FROM "post_likes" 
-                WHERE "postId" = $1 AND "status" = $2
-            ) 
-            AND "userIsBanned" = true
-      `,
-      [postId, status],
-    );
-  }
-
   async findUserByLoginOrEmail(loginOrEmail: string) {
     const result = await this.dataSource.query(
       `
