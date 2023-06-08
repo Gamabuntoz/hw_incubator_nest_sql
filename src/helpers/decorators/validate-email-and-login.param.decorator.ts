@@ -3,14 +3,14 @@ import {
   ValidatorConstraint,
   ValidatorConstraintInterface,
 } from 'class-validator';
-import { UsersRepository } from '../../public/users/users.repository';
+import { AuthRepository } from '../../public/auth/auth.repository';
 
 @ValidatorConstraint({ name: 'LoginOrEmailExist', async: true })
 @Injectable()
 export class LoginOrEmailExistRule implements ValidatorConstraintInterface {
-  constructor(private usersRepository: UsersRepository) {}
+  constructor(private authRepository: AuthRepository) {}
   async validate(value: string) {
-    const user = await this.usersRepository.findUserByLoginOrEmail(value);
+    const user = await this.authRepository.findUserByLoginOrEmail(value);
     return !user;
   }
   defaultMessage() {

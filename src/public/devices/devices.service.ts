@@ -18,8 +18,8 @@ export class DevicesService {
         new AuthDeviceDTO(
           d.ipAddress,
           d.deviceName,
-          new Date(d.issueAt).toISOString(),
-          d.deviceId,
+          new Date(+d.issueAt).toISOString(),
+          d.id,
         ),
     );
     return new Result<AuthDeviceDTO[]>(

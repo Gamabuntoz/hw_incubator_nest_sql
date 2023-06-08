@@ -38,7 +38,7 @@ import { NewPasswordCommand } from './applications/use-cases/new-user-password-u
 import { PasswordRecoveryCommand } from './applications/use-cases/recovery-user-password-use-cases';
 import { Result, ResultCode } from '../../helpers/contract';
 
-@UseGuards(ThrottlerGuard)
+//@UseGuards(ThrottlerGuard)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -46,9 +46,7 @@ export class AuthController {
     private commandBus: CommandBus,
   ) {}
   //
-  //
   // Query controller
-  //
   //
   @SkipThrottle()
   @UseGuards(JwtAccessAuthGuard)
@@ -92,7 +90,6 @@ export class AuthController {
     return result.data;
   }
 
-  @SkipThrottle()
   @HttpCode(HttpStatus.OK)
   @UseGuards(LocalAuthGuard)
   @Post('login')
@@ -171,7 +168,6 @@ export class AuthController {
     }
     return result.data;
   }
-
   @SkipThrottle()
   @UseGuards(JwtRefreshAuthGuard)
   @HttpCode(HttpStatus.NO_CONTENT)

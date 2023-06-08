@@ -1,8 +1,9 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InputEmailForResendCodeDTO } from '../auth.dto';
-import { UsersRepository } from '../../../users/users.repository';
+import { AuthRepository } from '../../auth.repository';
 import { EmailAdapter } from '../../../../adapters/email-adapter/email.adapter';
 import { Result, ResultCode } from '../../../../helpers/contract';
+import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class PasswordRecoveryCommand {
   constructor(public inputData: InputEmailForResendCodeDTO) {}
@@ -13,23 +14,23 @@ export class PasswordRecoveryUseCases
   implements ICommandHandler<PasswordRecoveryCommand>
 {
   constructor(
-    private usersRepository: UsersRepository,
+    private authRepository: AuthRepository,
     private emailAdapter: EmailAdapter,
   ) {}
 
   async execute(command: PasswordRecoveryCommand): Promise<Result<boolean>> {
-    let user = await this.usersRepository.findUserByLoginOrEmail(
+    let user: Users = await this.authRepository.findUserByLoginOrEmail(
       command.inputData.email,
     );
     if (!user)
       return new Result<boolean>(ResultCode.Success, true, 'User not found');
-    await this.usersRepository.createPasswordRecoveryCode(user._id.toString());
-    user = await this.usersRepository.findUserByLoginOrEmail(
+    await this.authRepository.createPasswordRecoveryCode(user.id);
+    user = await this.authRepository.findUserByLoginOrEmail(
       command.inputData.email,
     );
     await this.emailAdapter.sendEmailForPasswordRecovery(
-      user.accountData.email,
-      user.passwordRecovery?.code,
+      user.email,
+      user.passwordRecoveryCode,
     );
     return new Result<boolean>(ResultCode.Success, true, null);
   }

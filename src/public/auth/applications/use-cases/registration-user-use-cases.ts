@@ -1,13 +1,13 @@
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { InputRegistrationDTO } from '../auth.dto';
 import { EmailAdapter } from '../../../../adapters/email-adapter/email.adapter';
-import { UsersRepository } from '../../../users/users.repository';
+import { AuthRepository } from '../../auth.repository';
 import * as bcrypt from 'bcrypt';
-import { Types } from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 import add from 'date-fns/add';
-import { UserInfoDTO } from '../../../users/applications/users.dto';
+import { UserInfoDTO } from '../users.dto';
 import { Result, ResultCode } from '../../../../helpers/contract';
+import { Users } from '../../../../super_admin/sa_users/applications/users.entity';
 
 export class RegistrationUserCommand {
   constructor(public inputData: InputRegistrationDTO) {}
@@ -18,19 +18,16 @@ export class RegistrationUserUseCases
   implements ICommandHandler<RegistrationUserCommand>
 {
   constructor(
-    private usersRepository: UsersRepository,
+    private authRepository: AuthRepository,
     private emailAdapter: EmailAdapter,
   ) {}
 
   async execute(command: RegistrationUserCommand): Promise<Result<boolean>> {
     await this.createUser(command.inputData);
-    const user = await this.usersRepository.findUserByLoginOrEmail(
+    const user: Users = await this.authRepository.findUserByLoginOrEmail(
       command.inputData.login,
     );
-    await this.emailAdapter.sendEmail(
-      user.accountData.email,
-      user.emailConfirmation.confirmationCode,
-    );
+    await this.emailAdapter.sendEmail(user.email, user.emailConfirmationCode);
     return new Result<boolean>(ResultCode.Success, true, null);
   }
 
@@ -46,37 +43,29 @@ export class RegistrationUserUseCases
       inputData.password,
       passwordSalt,
     );
-    const newUser = {
-      _id: new Types.ObjectId(),
-      accountData: {
-        login: inputData.login,
-        email: inputData.email,
-        passwordHash: passwordHash,
-        createdAt: new Date().toISOString(),
-      },
-      emailConfirmation: {
-        confirmationCode: uuidv4(),
-        isConfirmed: false,
-        expirationDate: add(new Date(), {
-          hours: 1,
-        }),
-      },
-      passwordRecovery: {
-        code: 'string',
-        expirationDate: new Date(),
-      },
-      banInformation: {
-        isBanned: false,
-        banReason: 'not banned',
-        banDate: new Date(),
-      },
+    const newUser: Users = {
+      id: uuidv4(),
+      login: inputData.login,
+      email: inputData.email,
+      passwordHash: passwordHash,
+      createdAt: new Date().toISOString(),
+      emailConfirmationCode: uuidv4(),
+      emailIsConfirmed: false,
+      emailConfirmExpirationDate: add(new Date(), {
+        hours: 1,
+      }).toISOString(),
+      passwordRecoveryCode: 'string',
+      passwordRecoveryExpirationDate: new Date().toISOString(),
+      userIsBanned: false,
+      userBanReason: null,
+      userBanDate: null,
     };
-    await this.usersRepository.createUser(newUser);
+    await this.authRepository.createUser(newUser);
     return new UserInfoDTO(
-      newUser._id.toString(),
-      newUser.accountData.login,
-      newUser.accountData.email,
-      newUser.accountData.createdAt,
+      newUser.id,
+      newUser.login,
+      newUser.email,
+      newUser.createdAt,
     );
   }
 }

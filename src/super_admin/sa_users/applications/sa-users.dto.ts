@@ -36,7 +36,7 @@ export class QueryUsersDTO {
   constructor(
     public banStatus: string,
     public sortBy: string = 'createdAt',
-    public sortDirection: string = 'desc',
+    public sortDirection: 'ASC' | 'DESC' = 'DESC',
     public pageNumber: number = 1,
     public pageSize: number = 10,
     public searchLoginTerm: string,

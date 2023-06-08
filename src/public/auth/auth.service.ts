@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UsersRepository } from '../users/users.repository';
+import { AuthRepository } from './auth.repository';
 import { CurrentUserInfo } from './applications/auth.dto';
 import * as bcrypt from 'bcrypt';
 import { jwtConstants } from '../../helpers/constants';
@@ -9,17 +9,13 @@ import { Result, ResultCode } from '../../helpers/contract';
 @Injectable()
 export class AuthService {
   constructor(
-    protected usersRepository: UsersRepository,
+    protected usersRepository: AuthRepository,
     protected jwtService: JwtService,
   ) {}
 
   async getInfoAboutCurrentUser(id: string): Promise<Result<CurrentUserInfo>> {
     const user = await this.usersRepository.findUserById(id);
-    const currentUserView = new CurrentUserInfo(
-      user.accountData.email,
-      user.accountData.login,
-      id,
-    );
+    const currentUserView = new CurrentUserInfo(user.email, user.login, id);
     return new Result<CurrentUserInfo>(
       ResultCode.Success,
       currentUserView,
@@ -64,11 +60,11 @@ export class AuthService {
       loginOrEmail,
     );
     if (!user) return false;
-    if (!user.emailConfirmation.isConfirmed) return false;
+    if (!user.emailIsConfirmed) return false;
     const passwordHash = await this._generateHash(
       password,
-      user.accountData.passwordHash.slice(0, 29),
+      user.passwordHash.slice(0, 29),
     );
-    return user.accountData.passwordHash === passwordHash;
+    return user.passwordHash === passwordHash;
   }
 }

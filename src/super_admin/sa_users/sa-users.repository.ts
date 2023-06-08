@@ -1,102 +1,80 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { User, UserDocument } from './applications/users.schema';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { Users } from './applications/users.entity';
+import { FilterQuery } from 'mongoose';
 import { InputBanUserDTO, QueryUsersDTO } from './applications/sa-users.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class SAUsersRepository {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(
+    @InjectRepository(Users)
+    private readonly dbUsersRepository: Repository<Users>,
+  ) {}
 
-  async findAllUsers(filter: FilterQuery<User>, queryData: QueryUsersDTO) {
-    let sort = 'accountData.createdAt';
+  async findAllUsers(filter: FilterQuery<Users>, queryData: QueryUsersDTO) {
+    let sortBy = 'createdAt';
     if (queryData.sortBy) {
-      sort = `accountData.${queryData.sortBy}`;
+      sortBy = queryData.sortBy;
     }
-    return this.userModel
-      .find(filter)
-      .sort({ [sort]: queryData.sortDirection === 'asc' ? 1 : -1 })
-      .skip((queryData.pageNumber - 1) * queryData.pageSize)
+    const queryBuilder = this.dbUsersRepository.createQueryBuilder('u');
+    if (queryData.banStatus) {
+      queryBuilder.where({ 'u.userIsBanned': queryData.banStatus });
+    }
+    if (queryData.searchEmailTerm || queryData.searchLoginTerm) {
+      queryBuilder.where(
+        "u.email ILIKE '%' || :emailTerm || '%' OR u.login ILIKE '%' || :loginTerm || '%'",
+        {
+          emailTerm: queryData.searchEmailTerm,
+          loginTerm: queryData.searchLoginTerm,
+        },
+      );
+    }
+    queryBuilder
+      .orderBy(`u.${sortBy}`, queryData.sortDirection)
       .limit(queryData.pageSize)
-      .lean();
+      .offset((queryData.pageNumber - 1) * queryData.pageSize);
+    return queryBuilder.getMany();
   }
-  createFilter(searchLoginTerm?, searchEmailTerm?, banStatus?) {
-    let filter: any = { $or: [] };
-    const banStatusForSearch = banStatus === 'banned';
-    if (banStatus && banStatus !== 'all') {
-      filter['banInformation.isBanned'] = banStatusForSearch;
+
+  async totalCountUsers(queryData) {
+    const queryBuilder = this.dbUsersRepository.createQueryBuilder('u');
+    if (queryData.banStatus) {
+      queryBuilder.where({ userIsBanned: queryData.banStatus });
     }
-    if (searchLoginTerm) {
-      filter['$or'].push({
-        'accountData.login': {
-          $regex: searchLoginTerm,
-          $options: 'i',
+    if (queryData.searchEmailTerm || queryData.searchLoginTerm) {
+      queryBuilder.where(
+        "u.email ILIKE '%' || :emailTerm || '%' OR u.login ILIKE '%' || :loginTerm || '%'",
+        {
+          emailTerm: queryData.searchEmailTerm,
+          loginTerm: queryData.searchLoginTerm,
         },
-      });
+      );
     }
-
-    if (searchEmailTerm) {
-      filter['$or'].push({
-        'accountData.email': {
-          $regex: searchEmailTerm,
-          $options: 'i',
-        },
-      });
-    }
-    if (!searchLoginTerm && !searchEmailTerm && !banStatus) {
-      filter = {};
-    }
-    if (!searchLoginTerm && !searchEmailTerm && banStatus) {
-      filter = { 'banInformation.isBanned': banStatusForSearch };
-    }
-    return filter;
+    return queryBuilder.getCount();
   }
 
-  async totalCountUsers(filter) {
-    return this.userModel.countDocuments(filter);
-  }
-
-  async createUser(newUser: User) {
-    await this.userModel.create(newUser);
+  async createUser(newUser: Users) {
+    await this.dbUsersRepository.insert(newUser);
     return newUser;
   }
 
-  async findUserById(id: Types.ObjectId) {
-    return this.userModel.findOne({ _id: id });
+  async findUserById(id: string) {
+    return this.dbUsersRepository.findOne({ where: { id: id } });
   }
 
-  async updateUserBanStatus(
-    userId: Types.ObjectId,
-    inputData: InputBanUserDTO,
-  ) {
-    const result = await this.userModel.updateOne(
-      { _id: userId },
+  async updateUserBanStatus(userId: string, inputData: InputBanUserDTO) {
+    return this.dbUsersRepository.update(
+      { id: userId },
       {
-        $set: {
-          'banInformation.isBanned': inputData.isBanned,
-          'banInformation.banReason': inputData.isBanned
-            ? inputData.banReason
-            : null,
-          'banInformation.banDate': inputData.isBanned ? new Date() : null,
-        },
+        userIsBanned: inputData.isBanned,
+        userBanReason: inputData.isBanned ? inputData.banReason : null,
+        userBanDate: inputData.isBanned ? new Date().toISOString() : null,
       },
     );
-    return result.matchedCount === 1;
   }
 
-  async findUserByLoginOrEmail(loginOrEmail: string) {
-    return this.userModel.findOne({
-      $or: [
-        { 'accountData.login': loginOrEmail },
-        { 'accountData.email': loginOrEmail },
-      ],
-    });
-  }
-
-  async deleteUser(id: Types.ObjectId) {
-    const result = await this.userModel.deleteOne({
-      _id: id,
-    });
-    return result.deletedCount === 1;
+  async deleteUser(id: string) {
+    return this.dbUsersRepository.delete({ id: id });
   }
 }

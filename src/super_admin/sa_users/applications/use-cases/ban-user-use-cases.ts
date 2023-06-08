@@ -1,14 +1,10 @@
-import { Types } from 'mongoose';
 import { CommandHandler, ICommandHandler } from '@nestjs/cqrs';
 import { SAUsersRepository } from '../../sa-users.repository';
 import { Result, ResultCode } from '../../../../helpers/contract';
 import { InputBanUserDTO } from '../sa-users.dto';
 
 export class BanUserCommand {
-  constructor(
-    public userId: Types.ObjectId,
-    public inputData: InputBanUserDTO,
-  ) {}
+  constructor(public userId: string, public inputData: InputBanUserDTO) {}
 }
 
 @CommandHandler(BanUserCommand)
